@@ -1,0 +1,31 @@
+version: '3.4'
+
+volumes:
+  rabbitmq-volume:
+  mongodb-volume:
+
+services:
+  rabbitmq:
+    image: rabbitmq:3.7.3-management-alpine
+    restart: unless-stopped
+    ports:
+     - "5672:5672"
+     - "15672:15672" #expose port for management ui
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_DEFAULT_USER}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_DEFAULT_PASS}
+      RABBITMQ_ERLANG_COOKIE: ${RABBITMQ_ERLANG_COOKIE}
+    hostname: ${RABBITMQ_HOSTNAME}
+    volumes:
+      - rabbitmq-volume:/var/lib/rabbitmq
+  mongodb:
+    image: mongo:3.6.2-jessie
+    restart: unless-stopped
+    ports:
+     - "27017:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
+      MONGO_INITDB_DATABASE: ${MONGO_INITDB_DATABASE}
+    volumes:
+      - mongodb-volume:/data/db

@@ -1,4 +1,4 @@
-//go:generate goagen bootstrap -d github.com/danlock/goa-practice/design
+//go:generate make
 
 package main
 

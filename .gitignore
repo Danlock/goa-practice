@@ -2,6 +2,8 @@ vendor/*
 generated/*
 bin/*
 debug
+docker/.env
+
 
 # Personal
 .directory
