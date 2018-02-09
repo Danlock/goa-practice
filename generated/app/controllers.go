@@ -31,15 +31,14 @@ func initService(service *goa.Service) {
 	service.Decoder.Register(goa.NewJSONDecoder, "*/*")
 }
 
-// CarController is the controller interface for the Car actions.
-type CarController interface {
+// StatusController is the controller interface for the Status actions.
+type StatusController interface {
 	goa.Muxer
-	Create(*CreateCarContext) error
-	Show(*ShowCarContext) error
+	Show(*ShowStatusContext) error
 }
 
-// MountCarController "mounts" a Car resource controller on the given service.
-func MountCarController(service *goa.Service, ctrl CarController) {
+// MountStatusController "mounts" a Status resource controller on the given service.
+func MountStatusController(service *goa.Service, ctrl StatusController) {
 	initService(service)
 	var h goa.Handler
 
@@ -49,70 +48,12 @@ func MountCarController(service *goa.Service, ctrl CarController) {
 			return err
 		}
 		// Build the context
-		rctx, err := NewCreateCarContext(ctx, req, service)
-		if err != nil {
-			return err
-		}
-		return ctrl.Create(rctx)
-	}
-	service.Mux.Handle("POST", "/car/", ctrl.MuxHandler("create", h, nil))
-	service.LogInfo("mount", "ctrl", "Car", "action", "Create", "route", "POST /car/")
-
-	h = func(ctx context.Context, rw http.ResponseWriter, req *http.Request) error {
-		// Check if there was an error loading the request
-		if err := goa.ContextError(ctx); err != nil {
-			return err
-		}
-		// Build the context
-		rctx, err := NewShowCarContext(ctx, req, service)
+		rctx, err := NewShowStatusContext(ctx, req, service)
 		if err != nil {
 			return err
 		}
 		return ctrl.Show(rctx)
 	}
-	service.Mux.Handle("GET", "/car/:carID", ctrl.MuxHandler("show", h, nil))
-	service.LogInfo("mount", "ctrl", "Car", "action", "Show", "route", "GET /car/:carID")
-}
-
-// OfficerController is the controller interface for the Officer actions.
-type OfficerController interface {
-	goa.Muxer
-	Create(*CreateOfficerContext) error
-	Listen(*ListenOfficerContext) error
-}
-
-// MountOfficerController "mounts" a Officer resource controller on the given service.
-func MountOfficerController(service *goa.Service, ctrl OfficerController) {
-	initService(service)
-	var h goa.Handler
-
-	h = func(ctx context.Context, rw http.ResponseWriter, req *http.Request) error {
-		// Check if there was an error loading the request
-		if err := goa.ContextError(ctx); err != nil {
-			return err
-		}
-		// Build the context
-		rctx, err := NewCreateOfficerContext(ctx, req, service)
-		if err != nil {
-			return err
-		}
-		return ctrl.Create(rctx)
-	}
-	service.Mux.Handle("POST", "/officer/", ctrl.MuxHandler("create", h, nil))
-	service.LogInfo("mount", "ctrl", "Officer", "action", "Create", "route", "POST /officer/")
-
-	h = func(ctx context.Context, rw http.ResponseWriter, req *http.Request) error {
-		// Check if there was an error loading the request
-		if err := goa.ContextError(ctx); err != nil {
-			return err
-		}
-		// Build the context
-		rctx, err := NewListenOfficerContext(ctx, req, service)
-		if err != nil {
-			return err
-		}
-		return ctrl.Listen(rctx)
-	}
-	service.Mux.Handle("GET", "/officer/echo", ctrl.MuxHandler("listen", h, nil))
-	service.LogInfo("mount", "ctrl", "Officer", "action", "Listen", "route", "GET /officer/echo")
+	service.Mux.Handle("GET", "/status", ctrl.MuxHandler("show", h, nil))
+	service.LogInfo("mount", "ctrl", "Status", "action", "Show", "route", "GET /status")
 }

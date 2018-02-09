@@ -4,25 +4,24 @@ consumes:
 - application/gob
 - application/x-gob
 definitions:
-  PracticeCar:
-    description: Car with sensors (default view)
+  Status:
+    description: Status  of API and connections to remote services (default view)
     example:
-      id: 2.8241217e+18
-      name: Vel soluta fugit tenetur quos.
+      database: false
+      queue: true
     properties:
-      id:
-        description: Unique car ID
-        example: 2.8241217e+18
-        format: int64
-        type: integer
-      name:
-        description: Name of car
-        example: Vel soluta fugit tenetur quos.
-        type: string
+      database:
+        description: Is database connected and working?
+        example: false
+        type: boolean
+      queue:
+        description: Is queue connected and working?
+        example: true
+        type: boolean
     required:
-    - id
-    - name
-    title: 'Mediatype identifier: application/practice.car+json; view=default'
+    - database
+    - queue
+    title: 'Mediatype identifier: application/vnd.status+json; view=default'
     type: object
 host: localhost:8080
 info:
@@ -30,96 +29,32 @@ info:
   title: Practice for goa
   version: ""
 paths:
-  /car/:
-    post:
-      description: Create car by id
-      operationId: car#create
-      produces:
-      - application/practice.car+json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/PracticeCar'
-        "404":
-          description: Not Found
-      schemes:
-      - http
-      summary: create car
-      tags:
-      - car
-  /car/{carID}:
+  /status:
     get:
-      description: Get car by id
-      operationId: car#show
-      parameters:
-      - description: Car ID
-        in: path
-        name: carID
-        required: true
-        type: integer
+      description: Get status of server and connections
+      operationId: status#show
       produces:
-      - application/practice.car+json
+      - application/vnd.status+json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/PracticeCar'
-        "404":
-          description: Not Found
+            $ref: '#/definitions/Status'
       schemes:
       - http
-      summary: show car
+      summary: show status
       tags:
-      - car
-  /officer/:
-    post:
-      description: Create officer by id
-      operationId: officer#create
-      produces:
-      - application/practice.car+json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/PracticeCar'
-        "404":
-          description: Not Found
-      schemes:
-      - http
-      summary: create officer
-      tags:
-      - officer
-  /officer/echo:
-    get:
-      description: Create officer by id
-      operationId: officer#listen
-      produces:
-      - application/practice.car+json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/PracticeCar'
-        "404":
-          description: Not Found
-      schemes:
-      - ws
-      summary: listen officer
-      tags:
-      - officer
+      - status
 produces:
 - application/json
 - application/xml
 - application/gob
 - application/x-gob
 responses:
-  NotFound:
-    description: Not Found
   OK:
     description: OK
     schema:
-      $ref: '#/definitions/PracticeCar'
+      $ref: '#/definitions/Status'
 schemes:
 - http
 swagger: "2.0"

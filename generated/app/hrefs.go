@@ -10,13 +10,7 @@
 
 package app
 
-import (
-	"fmt"
-	"strings"
-)
-
-// CarHref returns the resource href.
-func CarHref(carID interface{}) string {
-	paramcarID := strings.TrimLeftFunc(fmt.Sprintf("%v", carID), func(r rune) bool { return r == '/' })
-	return fmt.Sprintf("/car/%v", paramcarID)
+// StatusHref returns the resource href.
+func StatusHref() string {
+	return "/status"
 }

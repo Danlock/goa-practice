@@ -10,25 +10,18 @@
 
 package app
 
-import (
-	"github.com/goadesign/goa"
-)
-
-// Car with sensors (default view)
+// Status  of API and connections to remote services (default view)
 //
-// Identifier: application/practice.car+json; view=default
-type PracticeCar struct {
-	// Unique car ID
-	ID int `form:"id" json:"id" xml:"id"`
-	// Name of car
-	Name string `form:"name" json:"name" xml:"name"`
+// Identifier: application/vnd.status+json; view=default
+type Status struct {
+	// Is database connected and working?
+	Database bool `form:"database" json:"database" xml:"database"`
+	// Is queue connected and working?
+	Queue bool `form:"queue" json:"queue" xml:"queue"`
 }
 
-// Validate validates the PracticeCar media type instance.
-func (mt *PracticeCar) Validate() (err error) {
+// Validate validates the Status media type instance.
+func (mt *Status) Validate() (err error) {
 
-	if mt.Name == "" {
-		err = goa.MergeErrors(err, goa.MissingAttributeError(`response`, "name"))
-	}
 	return
 }

@@ -13,7 +13,6 @@ package cli
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"github.com/danlock/goa-practice/generated/client"
 	"github.com/goadesign/goa"
 	goaclient "github.com/goadesign/goa/client"
@@ -27,25 +26,8 @@ import (
 )
 
 type (
-	// CreateCarCommand is the command line data structure for the create action of car
-	CreateCarCommand struct {
-		PrettyPrint bool
-	}
-
-	// ShowCarCommand is the command line data structure for the show action of car
-	ShowCarCommand struct {
-		// Car ID
-		CarID       int
-		PrettyPrint bool
-	}
-
-	// CreateOfficerCommand is the command line data structure for the create action of officer
-	CreateOfficerCommand struct {
-		PrettyPrint bool
-	}
-
-	// ListenOfficerCommand is the command line data structure for the listen action of officer
-	ListenOfficerCommand struct {
+	// ShowStatusCommand is the command line data structure for the show action of status
+	ShowStatusCommand struct {
 		PrettyPrint bool
 	}
 )
@@ -54,54 +36,17 @@ type (
 func RegisterCommands(app *cobra.Command, c *client.Client) {
 	var command, sub *cobra.Command
 	command = &cobra.Command{
-		Use:   "create",
-		Short: `create action`,
+		Use:   "show",
+		Short: `Get status of server and connections`,
 	}
-	tmp1 := new(CreateCarCommand)
+	tmp1 := new(ShowStatusCommand)
 	sub = &cobra.Command{
-		Use:   `car ["/car/"]`,
+		Use:   `status ["/status"]`,
 		Short: ``,
 		RunE:  func(cmd *cobra.Command, args []string) error { return tmp1.Run(c, args) },
 	}
 	tmp1.RegisterFlags(sub, c)
 	sub.PersistentFlags().BoolVar(&tmp1.PrettyPrint, "pp", false, "Pretty print response body")
-	command.AddCommand(sub)
-	tmp2 := new(CreateOfficerCommand)
-	sub = &cobra.Command{
-		Use:   `officer ["/officer/"]`,
-		Short: ``,
-		RunE:  func(cmd *cobra.Command, args []string) error { return tmp2.Run(c, args) },
-	}
-	tmp2.RegisterFlags(sub, c)
-	sub.PersistentFlags().BoolVar(&tmp2.PrettyPrint, "pp", false, "Pretty print response body")
-	command.AddCommand(sub)
-	app.AddCommand(command)
-	command = &cobra.Command{
-		Use:   "listen",
-		Short: `Create officer by id`,
-	}
-	tmp3 := new(ListenOfficerCommand)
-	sub = &cobra.Command{
-		Use:   `officer ["/officer/echo"]`,
-		Short: ``,
-		RunE:  func(cmd *cobra.Command, args []string) error { return tmp3.Run(c, args) },
-	}
-	tmp3.RegisterFlags(sub, c)
-	sub.PersistentFlags().BoolVar(&tmp3.PrettyPrint, "pp", false, "Pretty print response body")
-	command.AddCommand(sub)
-	app.AddCommand(command)
-	command = &cobra.Command{
-		Use:   "show",
-		Short: `Get car by id`,
-	}
-	tmp4 := new(ShowCarCommand)
-	sub = &cobra.Command{
-		Use:   `car ["/car/CARID"]`,
-		Short: ``,
-		RunE:  func(cmd *cobra.Command, args []string) error { return tmp4.Run(c, args) },
-	}
-	tmp4.RegisterFlags(sub, c)
-	sub.PersistentFlags().BoolVar(&tmp4.PrettyPrint, "pp", false, "Pretty print response body")
 	command.AddCommand(sub)
 	app.AddCommand(command)
 }
@@ -259,17 +204,17 @@ func boolArray(ins []string) ([]bool, error) {
 	return vals, nil
 }
 
-// Run makes the HTTP request corresponding to the CreateCarCommand command.
-func (cmd *CreateCarCommand) Run(c *client.Client, args []string) error {
+// Run makes the HTTP request corresponding to the ShowStatusCommand command.
+func (cmd *ShowStatusCommand) Run(c *client.Client, args []string) error {
 	var path string
 	if len(args) > 0 {
 		path = args[0]
 	} else {
-		path = "/car/"
+		path = "/status"
 	}
 	logger := goa.NewLogger(log.New(os.Stderr, "", log.LstdFlags))
 	ctx := goa.WithLogger(context.Background(), logger)
-	resp, err := c.CreateCar(ctx, path)
+	resp, err := c.ShowStatus(ctx, path)
 	if err != nil {
 		goa.LogError(ctx, "failed", "err", err)
 		return err
@@ -280,80 +225,5 @@ func (cmd *CreateCarCommand) Run(c *client.Client, args []string) error {
 }
 
 // RegisterFlags registers the command flags with the command line.
-func (cmd *CreateCarCommand) RegisterFlags(cc *cobra.Command, c *client.Client) {
-}
-
-// Run makes the HTTP request corresponding to the ShowCarCommand command.
-func (cmd *ShowCarCommand) Run(c *client.Client, args []string) error {
-	var path string
-	if len(args) > 0 {
-		path = args[0]
-	} else {
-		path = fmt.Sprintf("/car/%v", cmd.CarID)
-	}
-	logger := goa.NewLogger(log.New(os.Stderr, "", log.LstdFlags))
-	ctx := goa.WithLogger(context.Background(), logger)
-	resp, err := c.ShowCar(ctx, path)
-	if err != nil {
-		goa.LogError(ctx, "failed", "err", err)
-		return err
-	}
-
-	goaclient.HandleResponse(c.Client, resp, cmd.PrettyPrint)
-	return nil
-}
-
-// RegisterFlags registers the command flags with the command line.
-func (cmd *ShowCarCommand) RegisterFlags(cc *cobra.Command, c *client.Client) {
-	var carID int
-	cc.Flags().IntVar(&cmd.CarID, "carID", carID, `Car ID`)
-}
-
-// Run makes the HTTP request corresponding to the CreateOfficerCommand command.
-func (cmd *CreateOfficerCommand) Run(c *client.Client, args []string) error {
-	var path string
-	if len(args) > 0 {
-		path = args[0]
-	} else {
-		path = "/officer/"
-	}
-	logger := goa.NewLogger(log.New(os.Stderr, "", log.LstdFlags))
-	ctx := goa.WithLogger(context.Background(), logger)
-	resp, err := c.CreateOfficer(ctx, path)
-	if err != nil {
-		goa.LogError(ctx, "failed", "err", err)
-		return err
-	}
-
-	goaclient.HandleResponse(c.Client, resp, cmd.PrettyPrint)
-	return nil
-}
-
-// RegisterFlags registers the command flags with the command line.
-func (cmd *CreateOfficerCommand) RegisterFlags(cc *cobra.Command, c *client.Client) {
-}
-
-// Run establishes a websocket connection for the ListenOfficerCommand command.
-func (cmd *ListenOfficerCommand) Run(c *client.Client, args []string) error {
-	var path string
-	if len(args) > 0 {
-		path = args[0]
-	} else {
-		path = "/officer/echo"
-	}
-	logger := goa.NewLogger(log.New(os.Stderr, "", log.LstdFlags))
-	ctx := goa.WithLogger(context.Background(), logger)
-	ws, err := c.ListenOfficer(ctx, path)
-	if err != nil {
-		goa.LogError(ctx, "failed", "err", err)
-		return err
-	}
-	go goaclient.WSWrite(ws)
-	goaclient.WSRead(ws)
-
-	return nil
-}
-
-// RegisterFlags registers the command flags with the command line.
-func (cmd *ListenOfficerCommand) RegisterFlags(cc *cobra.Command, c *client.Client) {
+func (cmd *ShowStatusCommand) RegisterFlags(cc *cobra.Command, c *client.Client) {
 }
