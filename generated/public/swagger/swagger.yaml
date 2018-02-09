@@ -1,0 +1,125 @@
+consumes:
+- application/json
+- application/xml
+- application/gob
+- application/x-gob
+definitions:
+  PracticeCar:
+    description: Car with sensors (default view)
+    example:
+      id: 2.8241217e+18
+      name: Vel soluta fugit tenetur quos.
+    properties:
+      id:
+        description: Unique car ID
+        example: 2.8241217e+18
+        format: int64
+        type: integer
+      name:
+        description: Name of car
+        example: Vel soluta fugit tenetur quos.
+        type: string
+    required:
+    - id
+    - name
+    title: 'Mediatype identifier: application/practice.car+json; view=default'
+    type: object
+host: localhost:8080
+info:
+  description: Testing code and doc generation with goa
+  title: Practice for goa
+  version: ""
+paths:
+  /car/:
+    post:
+      description: Create car by id
+      operationId: car#create
+      produces:
+      - application/practice.car+json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/PracticeCar'
+        "404":
+          description: Not Found
+      schemes:
+      - http
+      summary: create car
+      tags:
+      - car
+  /car/{carID}:
+    get:
+      description: Get car by id
+      operationId: car#show
+      parameters:
+      - description: Car ID
+        in: path
+        name: carID
+        required: true
+        type: integer
+      produces:
+      - application/practice.car+json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/PracticeCar'
+        "404":
+          description: Not Found
+      schemes:
+      - http
+      summary: show car
+      tags:
+      - car
+  /officer/:
+    post:
+      description: Create officer by id
+      operationId: officer#create
+      produces:
+      - application/practice.car+json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/PracticeCar'
+        "404":
+          description: Not Found
+      schemes:
+      - http
+      summary: create officer
+      tags:
+      - officer
+  /officer/echo:
+    get:
+      description: Create officer by id
+      operationId: officer#listen
+      produces:
+      - application/practice.car+json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/PracticeCar'
+        "404":
+          description: Not Found
+      schemes:
+      - ws
+      summary: listen officer
+      tags:
+      - officer
+produces:
+- application/json
+- application/xml
+- application/gob
+- application/x-gob
+responses:
+  NotFound:
+    description: Not Found
+  OK:
+    description: OK
+    schema:
+      $ref: '#/definitions/PracticeCar'
+schemes:
+- http
+swagger: "2.0"
