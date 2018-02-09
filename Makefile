@@ -6,9 +6,7 @@
 DEPEND= gopkg.in/goadesign/goa.v1 \
 	gopkg.in/goadesign/goa.v1/goagen
 
-CURRENT_DIR := $(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))
-
-all: depend clean generate generate-controllers fix-vendor build
+all: depend clean generate fix-vendor build
 
 depend:
 	@echo "Downloading dependencies..."
@@ -27,18 +25,6 @@ generate:
 	@goagen schema -d github.com/danlock/goa-practice/design -o generated/public
 	@goagen client  -d github.com/danlock/goa-practice/design -o generated
 
-#regenerate main and controller files, delete duplicate controllers, only needed on initial run because main doesnt get regenerated properly
-generate-main:
-	@echo "Generating scaffolding for main..."
-	@goagen main     -d github.com/danlock/goa-practice/design
-	@goagen controller     -d github.com/danlock/goa-practice/design -o controller --app-pkg ../generated/app --regen
-	@ls controller/ | xargs rm
-
-generate-controllers:
-	@echo "Regenerating scaffolding for controllers..."
-	@goagen controller     -d github.com/danlock/goa-practice/design -o controller --app-pkg ../generated/app --regen
-
-
 fix-vendor:
 	@echo "Fixing vendor directory..."
 	@	@mv temp-vendor/ vendor/ 
@@ -46,3 +32,12 @@ fix-vendor:
 build:
 	@echo "Building binary..."
 	@go build -o bin/goa-practice
+
+#regenerate main and controller files, these files need to be deleted or they will conflict with real main and controllers outside of generated/
+generate-scaffolding:
+	@echo "Generating scaffolding..."
+	@goagen main     -d github.com/danlock/goa-practice/design -o generated/main
+
+delete-scaffolding:
+	@echo "Deleting scaffolding..."
+	@rm -rf generated/main
