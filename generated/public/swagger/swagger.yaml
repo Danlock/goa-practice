@@ -4,24 +4,125 @@ consumes:
 - application/gob
 - application/x-gob
 definitions:
+  Asset:
+    description: An asset can be pretty much anything (default view)
+    example:
+      _id: Perspiciatis vel soluta fugit tenetur.
+      createdAt: 2002-12-31T18:55:28Z
+      data: false
+      name: sm4hz
+      type: car
+      updatedAt: 2003-07-18T22:44:26Z
+    properties:
+      _id:
+        description: Identifier for asset
+        example: Perspiciatis vel soluta fugit tenetur.
+        type: string
+      createdAt:
+        description: timestamp of when the asset was created
+        example: 2002-12-31T18:55:28Z
+        format: date-time
+        type: string
+      data:
+        description: Type specific data
+        example: false
+      name:
+        description: Name of asset
+        example: sm4hz
+        minLength: 3
+        type: string
+      type:
+        description: Type of asset
+        enum:
+        - car
+        example: car
+        type: string
+      updatedAt:
+        description: timestamp of when the asset was updated
+        example: 2003-07-18T22:44:26Z
+        format: date-time
+        type: string
+    required:
+    - _id
+    - name
+    - type
+    - data
+    title: 'Mediatype identifier: application/vnd.asset+json; view=default'
+    type: object
+  AssetCollection:
+    description: AssetCollection is the media type for an array of Asset (default
+      view)
+    example:
+    - _id: Perspiciatis vel soluta fugit tenetur.
+      createdAt: 2002-12-31T18:55:28Z
+      data: false
+      name: sm4hz
+      type: car
+      updatedAt: 2003-07-18T22:44:26Z
+    items:
+      $ref: '#/definitions/Asset'
+    title: 'Mediatype identifier: application/vnd.asset+json; type=collection; view=default'
+    type: array
+  CreateAssetPayload:
+    example:
+      data: 0.89316684
+      name: 6ov5w
+      type: car
+    properties:
+      data:
+        description: Type specific data
+        example: 0.89316684
+      name:
+        description: Name of asset
+        example: 6ov5w
+        minLength: 3
+        type: string
+      type:
+        description: Type of asset
+        enum:
+        - car
+        example: car
+        type: string
+    required:
+    - name
+    - type
+    - data
+    title: CreateAssetPayload
+    type: object
   Status:
     description: Status  of API and connections to remote services (default view)
     example:
       database: false
-      queue: true
     properties:
       database:
         description: Is database connected and working?
         example: false
         type: boolean
-      queue:
-        description: Is queue connected and working?
-        example: true
-        type: boolean
     required:
     - database
-    - queue
     title: 'Mediatype identifier: application/vnd.status+json; view=default'
+    type: object
+  UpdateAssetPayload:
+    example:
+      data: 0.4868256
+      name: 1n6
+      type: car
+    properties:
+      data:
+        description: Type specific data
+        example: 0.4868256
+      name:
+        description: Name of asset
+        example: 1n6
+        minLength: 3
+        type: string
+      type:
+        description: Type of asset
+        enum:
+        - car
+        example: car
+        type: string
+    title: UpdateAssetPayload
     type: object
 host: localhost:8080
 info:
@@ -29,6 +130,111 @@ info:
   title: Practice for goa
   version: ""
 paths:
+  /asset:
+    get:
+      description: Get all assets
+      operationId: asset#showAll
+      produces:
+      - application/vnd.asset+json; type=collection
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/AssetCollection'
+      schemes:
+      - http
+      summary: showAll asset
+      tags:
+      - asset
+    post:
+      description: Create new assets
+      operationId: asset#create
+      parameters:
+      - in: body
+        name: payload
+        required: true
+        schema:
+          $ref: '#/definitions/CreateAssetPayload'
+      produces:
+      - application/vnd.asset+json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/Asset'
+      schemes:
+      - http
+      summary: create asset
+      tags:
+      - asset
+  /asset/{assetID}:
+    delete:
+      description: Delete specific asset
+      operationId: asset#delete
+      parameters:
+      - in: path
+        name: assetID
+        required: true
+        type: string
+      produces:
+      - application/vnd.asset+json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/Asset'
+      schemes:
+      - http
+      summary: delete asset
+      tags:
+      - asset
+    get:
+      description: Get specific asset
+      operationId: asset#show
+      parameters:
+      - description: Asset ID
+        in: path
+        name: assetID
+        required: true
+        type: string
+      produces:
+      - application/vnd.asset+json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/Asset'
+      schemes:
+      - http
+      summary: show asset
+      tags:
+      - asset
+    put:
+      description: Update specific asset
+      operationId: asset#update
+      parameters:
+      - description: Asset ID
+        in: path
+        name: assetID
+        required: true
+        type: string
+      - in: body
+        name: payload
+        required: true
+        schema:
+          $ref: '#/definitions/UpdateAssetPayload'
+      produces:
+      - application/vnd.asset+json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/Asset'
+      schemes:
+      - http
+      summary: update asset
+      tags:
+      - asset
   /status:
     get:
       description: Get status of server and connections
@@ -45,6 +251,17 @@ paths:
       summary: show status
       tags:
       - status
+  /swagger.json:
+    get:
+      operationId: swagger#/swagger.json
+      responses:
+        "200":
+          description: File downloaded
+          schema:
+            type: file
+      schemes:
+      - http
+      summary: Download generated/public/swagger/swagger.json
 produces:
 - application/json
 - application/xml
@@ -54,7 +271,7 @@ responses:
   OK:
     description: OK
     schema:
-      $ref: '#/definitions/Status'
+      $ref: '#/definitions/Asset'
 schemes:
 - http
 swagger: "2.0"

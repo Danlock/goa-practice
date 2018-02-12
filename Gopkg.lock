@@ -36,6 +36,7 @@
   packages = [
     ".",
     "client",
+    "cors",
     "design",
     "design/apidsl",
     "dslengine",
@@ -114,6 +115,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "9cfa85c93fdc2367c24b39c012f6a349c513c092c8df866b832687d5f1623cee"
+  inputs-digest = "e5643e8bda613767b950bd1e1812744614582447a7b538a9f5f3a4b25bbe9391"
   solver-name = "gps-cdcl"
   solver-version = 1

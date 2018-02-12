@@ -10,18 +10,73 @@
 
 package app
 
+import (
+	"github.com/globalsign/mgo/bson"
+	"github.com/goadesign/goa"
+	"time"
+	"unicode/utf8"
+)
+
+// An asset can be pretty much anything (default view)
+//
+// Identifier: application/vnd.asset+json; view=default
+type Asset struct {
+	// Identifier for asset
+	ID bson.ObjectId `bson:"_id" form:"_id" json:"_id"`
+	// timestamp of when the asset was created
+	CreatedAt *time.Time `form:"createdAt,omitempty" json:"createdAt,omitempty" xml:"createdAt,omitempty"`
+	// Type specific data
+	Data interface{} `form:"data" json:"data" xml:"data"`
+	// Name of asset
+	Name string `form:"name" json:"name" xml:"name"`
+	// Type of asset
+	Type string `form:"type" json:"type" xml:"type"`
+	// timestamp of when the asset was updated
+	UpdatedAt *time.Time `form:"updatedAt,omitempty" json:"updatedAt,omitempty" xml:"updatedAt,omitempty"`
+}
+
+// Validate validates the Asset media type instance.
+func (mt *Asset) Validate() (err error) {
+	if mt.ID == "" {
+		err = goa.MergeErrors(err, goa.MissingAttributeError(`response`, "_id"))
+	}
+	if mt.Name == "" {
+		err = goa.MergeErrors(err, goa.MissingAttributeError(`response`, "name"))
+	}
+	if mt.Type == "" {
+		err = goa.MergeErrors(err, goa.MissingAttributeError(`response`, "type"))
+	}
+
+	if utf8.RuneCountInString(mt.Name) < 3 {
+		err = goa.MergeErrors(err, goa.InvalidLengthError(`response.name`, mt.Name, utf8.RuneCountInString(mt.Name), 3, true))
+	}
+	if !(mt.Type == "car") {
+		err = goa.MergeErrors(err, goa.InvalidEnumValueError(`response.type`, mt.Type, []interface{}{"car"}))
+	}
+	return
+}
+
+// AssetCollection is the media type for an array of Asset (default view)
+//
+// Identifier: application/vnd.asset+json; type=collection; view=default
+type AssetCollection []*Asset
+
+// Validate validates the AssetCollection media type instance.
+func (mt AssetCollection) Validate() (err error) {
+	for _, e := range mt {
+		if e != nil {
+			if err2 := e.Validate(); err2 != nil {
+				err = goa.MergeErrors(err, err2)
+			}
+		}
+	}
+	return
+}
+
 // Status  of API and connections to remote services (default view)
 //
 // Identifier: application/vnd.status+json; view=default
 type Status struct {
 	// Is database connected and working?
 	Database bool `form:"database" json:"database" xml:"database"`
-	// Is queue connected and working?
-	Queue bool `form:"queue" json:"queue" xml:"queue"`
-}
-
-// Validate validates the Status media type instance.
-func (mt *Status) Validate() (err error) {
-
-	return
 }

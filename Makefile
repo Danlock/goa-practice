@@ -4,38 +4,37 @@
 DEPEND= gopkg.in/goadesign/goa.v1 \
 	gopkg.in/goadesign/goa.v1/goagen
 
-all: depend clean generate fix-vendor
+all: depend regen
 
-regenerate: clean generate fix-vendor
+regen: clean generate fix-vendor
 
 depend:
-	@echo "Downloading dependencies..."
+	@echo "Go getting goagen..."
 	@go get $(DEPEND)
+	@echo "Dep ensuring packages..."
 	@dep ensure
 
 clean:
-	@echo "Cleaning old generated files and renaming vendor to avoid goagen conflicts..."
+	@echo "Cleaning old generated files..."
 	@rm -rf generated
-	@rm -rf temp-vendor/ #Only would be made as a result of previous botched builds
-	@mv vendor/ temp-vendor/
 
 generate:
-	@echo "Generating..."
-	@goagen app     -d github.com/danlock/goa-practice/design -o generated
+	@echo "Generating and renaming vendor to avoid goagen conflicts......"
+	@mv vendor/ temp-vendor/
+	@goagen app     -d github.com/danlock/goa-practice/design -o generated || $(MAKE) fix-vendor
 	@goagen swagger -d github.com/danlock/goa-practice/design -o generated/public
 	@goagen schema -d github.com/danlock/goa-practice/design -o generated/public
 	@goagen client  -d github.com/danlock/goa-practice/design -o generated
 
 fix-vendor:
-	@echo "Fixing vendor directory..."
 	@mv temp-vendor/ vendor/ 
 
 build:
 	@echo "Building binary..."
 	@go build -o bin/goa-practice
 
-#regenerate main and controller files, these files need to be deleted/merged or they will cause errors
-generate-scaffolding:
+#regenerate main and controller files, these files need to be deleted or they will cause errors
+scaffolding:
 	@$(MAKE) clean
 	@$(MAKE) generate
 	@echo "Generating scaffolding..."

@@ -10,12 +10,10 @@ var StatusMedia = apidsl.MediaType("application/vnd.status+json", func() {
 	apidsl.Description("Status  of API and connections to remote services")
 	apidsl.Attributes(func() { // Attributes define the media type shape.
 		apidsl.Attribute("database", design.Boolean, "Is database connected and working?")
-		apidsl.Attribute("queue", design.Boolean, "Is queue connected and working?")
-		apidsl.Required("database", "queue")
+		apidsl.Required("database")
 	})
 	apidsl.View("default", func() { // View defines a rendering of the media type.
 		apidsl.Attribute("database")
-		apidsl.Attribute("queue")
 	})
 })
 

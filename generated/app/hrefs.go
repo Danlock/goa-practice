@@ -10,6 +10,17 @@
 
 package app
 
+import (
+	"fmt"
+	"strings"
+)
+
+// AssetHref returns the resource href.
+func AssetHref(assetID interface{}) string {
+	paramassetID := strings.TrimLeftFunc(fmt.Sprintf("%v", assetID), func(r rune) bool { return r == '/' })
+	return fmt.Sprintf("/asset/%v", paramassetID)
+}
+
 // StatusHref returns the resource href.
 func StatusHref() string {
 	return "/status"

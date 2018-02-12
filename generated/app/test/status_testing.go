@@ -87,10 +87,6 @@ func ShowStatusOK(t goatest.TInterface, ctx context.Context, service *goa.Servic
 		if !_ok {
 			t.Fatalf("invalid response media: got variable of type %T, value %+v, expected instance of app.Status", resp, resp)
 		}
-		_err = mt.Validate()
-		if _err != nil {
-			t.Errorf("invalid response media type: %s", _err)
-		}
 	}
 
 	// Return results
