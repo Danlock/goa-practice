@@ -15,7 +15,7 @@ definitions:
       updatedAt: 2003-07-18T22:44:26Z
     properties:
       _id:
-        description: Identifier for asset
+        description: Object ID attribute
         example: Perspiciatis vel soluta fugit tenetur.
         type: string
       createdAt:
@@ -42,11 +42,6 @@ definitions:
         example: 2003-07-18T22:44:26Z
         format: date-time
         type: string
-    required:
-    - _id
-    - name
-    - type
-    - data
     title: 'Mediatype identifier: application/vnd.asset+json; view=default'
     type: object
   AssetCollection:
@@ -192,8 +187,7 @@ paths:
       description: Get specific asset
       operationId: asset#show
       parameters:
-      - description: Asset ID
-        in: path
+      - in: path
         name: assetID
         required: true
         type: string
@@ -213,8 +207,7 @@ paths:
       description: Update specific asset
       operationId: asset#update
       parameters:
-      - description: Asset ID
-        in: path
+      - in: path
         name: assetID
         required: true
         type: string
@@ -230,6 +223,8 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/Asset'
+        "404":
+          description: Not Found
       schemes:
       - http
       summary: update asset
@@ -268,6 +263,8 @@ produces:
 - application/gob
 - application/x-gob
 responses:
+  NotFound:
+    description: Not Found
   OK:
     description: OK
     schema:

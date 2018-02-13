@@ -13,7 +13,6 @@ package app
 import (
 	"context"
 	"github.com/goadesign/goa"
-	uuid "github.com/satori/go.uuid"
 	"net/http"
 	"unicode/utf8"
 )
@@ -41,11 +40,11 @@ func NewCreateAssetContext(ctx context.Context, r *http.Request, service *goa.Se
 // createAssetPayload is the asset create action payload.
 type createAssetPayload struct {
 	// Type specific data
-	Data *interface{} `form:"data,omitempty" json:"data,omitempty" xml:"data,omitempty"`
+	Data *interface{} `bson:"data,omitempty" form:"data" json:"data,omitempty"`
 	// Name of asset
-	Name *string `form:"name,omitempty" json:"name,omitempty" xml:"name,omitempty"`
+	Name *string `bson:"name,omitempty" form:"name" json:"name,omitempty"`
 	// Type of asset
-	Type *string `form:"type,omitempty" json:"type,omitempty" xml:"type,omitempty"`
+	Type *string `bson:"type,omitempty" form:"type" json:"type,omitempty"`
 }
 
 // Validate runs the validation rules defined in the design.
@@ -90,11 +89,11 @@ func (payload *createAssetPayload) Publicize() *CreateAssetPayload {
 // CreateAssetPayload is the asset create action payload.
 type CreateAssetPayload struct {
 	// Type specific data
-	Data interface{} `form:"data" json:"data" xml:"data"`
+	Data interface{} `bson:"data,omitempty" form:"data" json:"data,omitempty"`
 	// Name of asset
-	Name string `form:"name" json:"name" xml:"name"`
+	Name string `bson:"name,omitempty" form:"name" json:"name,omitempty"`
 	// Type of asset
-	Type string `form:"type" json:"type" xml:"type"`
+	Type string `bson:"type,omitempty" form:"type" json:"type,omitempty"`
 }
 
 // Validate runs the validation rules defined in the design.
@@ -161,7 +160,7 @@ type ShowAssetContext struct {
 	context.Context
 	*goa.ResponseData
 	*goa.RequestData
-	AssetID uuid.UUID
+	AssetID string
 }
 
 // NewShowAssetContext parses the incoming request URL and body, performs validations and creates the
@@ -176,11 +175,7 @@ func NewShowAssetContext(ctx context.Context, r *http.Request, service *goa.Serv
 	paramAssetID := req.Params["assetID"]
 	if len(paramAssetID) > 0 {
 		rawAssetID := paramAssetID[0]
-		if assetID, err2 := uuid.FromString(rawAssetID); err2 == nil {
-			rctx.AssetID = assetID
-		} else {
-			err = goa.MergeErrors(err, goa.InvalidParamTypeError("assetID", rawAssetID, "uuid"))
-		}
+		rctx.AssetID = rawAssetID
 	}
 	return &rctx, err
 }
@@ -228,7 +223,7 @@ type UpdateAssetContext struct {
 	context.Context
 	*goa.ResponseData
 	*goa.RequestData
-	AssetID uuid.UUID
+	AssetID string
 	Payload *UpdateAssetPayload
 }
 
@@ -244,11 +239,7 @@ func NewUpdateAssetContext(ctx context.Context, r *http.Request, service *goa.Se
 	paramAssetID := req.Params["assetID"]
 	if len(paramAssetID) > 0 {
 		rawAssetID := paramAssetID[0]
-		if assetID, err2 := uuid.FromString(rawAssetID); err2 == nil {
-			rctx.AssetID = assetID
-		} else {
-			err = goa.MergeErrors(err, goa.InvalidParamTypeError("assetID", rawAssetID, "uuid"))
-		}
+		rctx.AssetID = rawAssetID
 	}
 	return &rctx, err
 }
@@ -256,11 +247,11 @@ func NewUpdateAssetContext(ctx context.Context, r *http.Request, service *goa.Se
 // updateAssetPayload is the asset update action payload.
 type updateAssetPayload struct {
 	// Type specific data
-	Data *interface{} `form:"data,omitempty" json:"data,omitempty" xml:"data,omitempty"`
+	Data *interface{} `bson:"data,omitempty" form:"data" json:"data,omitempty"`
 	// Name of asset
-	Name *string `form:"name,omitempty" json:"name,omitempty" xml:"name,omitempty"`
+	Name *string `bson:"name,omitempty" form:"name" json:"name,omitempty"`
 	// Type of asset
-	Type *string `form:"type,omitempty" json:"type,omitempty" xml:"type,omitempty"`
+	Type *string `bson:"type,omitempty" form:"type" json:"type,omitempty"`
 }
 
 // Validate runs the validation rules defined in the design.
@@ -296,11 +287,11 @@ func (payload *updateAssetPayload) Publicize() *UpdateAssetPayload {
 // UpdateAssetPayload is the asset update action payload.
 type UpdateAssetPayload struct {
 	// Type specific data
-	Data *interface{} `form:"data,omitempty" json:"data,omitempty" xml:"data,omitempty"`
+	Data *interface{} `bson:"data,omitempty" form:"data" json:"data,omitempty"`
 	// Name of asset
-	Name *string `form:"name,omitempty" json:"name,omitempty" xml:"name,omitempty"`
+	Name *string `bson:"name,omitempty" form:"name" json:"name,omitempty"`
 	// Type of asset
-	Type *string `form:"type,omitempty" json:"type,omitempty" xml:"type,omitempty"`
+	Type *string `bson:"type,omitempty" form:"type" json:"type,omitempty"`
 }
 
 // Validate runs the validation rules defined in the design.
@@ -324,6 +315,12 @@ func (ctx *UpdateAssetContext) OK(r *Asset) error {
 		ctx.ResponseData.Header().Set("Content-Type", "application/vnd.asset+json")
 	}
 	return ctx.ResponseData.Service.Send(ctx.Context, 200, r)
+}
+
+// NotFound sends a HTTP response with status code 404.
+func (ctx *UpdateAssetContext) NotFound() error {
+	ctx.ResponseData.WriteHeader(404)
+	return nil
 }
 
 // ShowStatusContext provides the status show action context.

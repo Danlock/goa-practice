@@ -47,6 +47,7 @@ func main() {
 	service.Use(middleware.LogRequest(true))
 	service.Use(middleware.LogResponse())
 	service.Use(middleware.ErrorHandler(service, true))
+	//TODO: Recover middleware sends panics to the user as response, only mount in development.
 	service.Use(middleware.Recover())
 
 	mgoSession, amqpConn := setupSessions()

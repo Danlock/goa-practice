@@ -14,7 +14,6 @@ import (
 	"bytes"
 	"context"
 	"fmt"
-	uuid "github.com/goadesign/goa/uuid"
 	"net/http"
 	"net/url"
 )
@@ -22,11 +21,11 @@ import (
 // CreateAssetPayload is the asset create action payload.
 type CreateAssetPayload struct {
 	// Type specific data
-	Data interface{} `form:"data" json:"data" xml:"data"`
+	Data interface{} `bson:"data,omitempty" form:"data" json:"data,omitempty"`
 	// Name of asset
-	Name string `form:"name" json:"name" xml:"name"`
+	Name string `bson:"name,omitempty" form:"name" json:"name,omitempty"`
 	// Type of asset
-	Type string `form:"type" json:"type" xml:"type"`
+	Type string `bson:"type,omitempty" form:"type" json:"type,omitempty"`
 }
 
 // CreateAssetPath computes a request path to the create action of asset.
@@ -103,8 +102,8 @@ func (c *Client) NewDeleteAssetRequest(ctx context.Context, path string) (*http.
 }
 
 // ShowAssetPath computes a request path to the show action of asset.
-func ShowAssetPath(assetID uuid.UUID) string {
-	param0 := assetID.String()
+func ShowAssetPath(assetID string) string {
+	param0 := assetID
 
 	return fmt.Sprintf("/asset/%s", param0)
 }
@@ -164,16 +163,16 @@ func (c *Client) NewShowAllAssetRequest(ctx context.Context, path string) (*http
 // UpdateAssetPayload is the asset update action payload.
 type UpdateAssetPayload struct {
 	// Type specific data
-	Data *interface{} `form:"data,omitempty" json:"data,omitempty" xml:"data,omitempty"`
+	Data *interface{} `bson:"data,omitempty" form:"data" json:"data,omitempty"`
 	// Name of asset
-	Name *string `form:"name,omitempty" json:"name,omitempty" xml:"name,omitempty"`
+	Name *string `bson:"name,omitempty" form:"name" json:"name,omitempty"`
 	// Type of asset
-	Type *string `form:"type,omitempty" json:"type,omitempty" xml:"type,omitempty"`
+	Type *string `bson:"type,omitempty" form:"type" json:"type,omitempty"`
 }
 
 // UpdateAssetPath computes a request path to the update action of asset.
-func UpdateAssetPath(assetID uuid.UUID) string {
-	param0 := assetID.String()
+func UpdateAssetPath(assetID string) string {
+	param0 := assetID
 
 	return fmt.Sprintf("/asset/%s", param0)
 }

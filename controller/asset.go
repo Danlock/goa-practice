@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"errors"
 	"log"
 	"time"
 
@@ -54,6 +55,7 @@ func (c *AssetController) ShowAll(ctx *app.ShowAllAssetContext) error {
 		log.Printf("Error finding all assets from mongo!\n%s", err)
 		return err
 	}
+
 	return ctx.OK(assets)
 	// AssetController_ShowAll: end_implement
 }
@@ -62,12 +64,15 @@ func (c *AssetController) ShowAll(ctx *app.ShowAllAssetContext) error {
 func (c *AssetController) Create(ctx *app.CreateAssetContext) error {
 	// AssetController_Create: start_implement
 	now := time.Now()
-
+	assetID := bson.NewObjectId()
+	assetName := ctx.Payload.Name
+	assetType := ctx.Payload.Type
+	assetData := ctx.Payload.Data
 	asset := app.Asset{
-		ID:        bson.NewObjectId(),
-		Name:      ctx.Payload.Name,
-		Type:      ctx.Payload.Type,
-		Data:      ctx.Payload.Data,
+		ID:        &assetID,
+		Name:      &assetName,
+		Type:      &assetType,
+		Data:      &assetData,
 		CreatedAt: &now,
 		UpdatedAt: &now,
 	}
@@ -85,10 +90,27 @@ func (c *AssetController) Create(ctx *app.CreateAssetContext) error {
 // Update runs the update action.
 func (c *AssetController) Update(ctx *app.UpdateAssetContext) error {
 	// AssetController_Update: start_implement
+	now := time.Now()
 
-	// Put your logic here
+	if !bson.IsObjectIdHex(ctx.AssetID) {
+		log.Printf("AssetID %s is not an ObjectID!", ctx.AssetID)
+		return ctx.NotFound()
+	}
+	assetID := bson.ObjectIdHex(ctx.AssetID)
 
-	res := &app.Asset{}
-	return ctx.OK(res)
+	asset := app.Asset{
+		Name:      ctx.Payload.Name,
+		Type:      ctx.Payload.Type,
+		Data:      ctx.Payload.Data,
+		UpdatedAt: &now,
+	}
+
+	err := c.mgoSesh.DB("test").C("asset").Update(bson.M{"_id": &assetID}, bson.M{"$set": &asset})
+	if err != nil {
+		log.Panicf("Error updating asset %s!\n%s", ctx.AssetID, err)
+		return errors.New("")
+	}
+
+	return ctx.OK(nil)
 	// AssetController_Update: end_implement
 }

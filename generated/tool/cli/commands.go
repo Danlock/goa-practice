@@ -43,7 +43,6 @@ type (
 
 	// ShowAssetCommand is the command line data structure for the show action of asset
 	ShowAssetCommand struct {
-		// Asset ID
 		AssetID     string
 		PrettyPrint bool
 	}
@@ -57,7 +56,6 @@ type (
 	UpdateAssetCommand struct {
 		Payload     string
 		ContentType string
-		// Asset ID
 		AssetID     string
 		PrettyPrint bool
 	}
@@ -444,7 +442,7 @@ func (cmd *ShowAssetCommand) Run(c *client.Client, args []string) error {
 	if len(args) > 0 {
 		path = args[0]
 	} else {
-		path = fmt.Sprintf("/asset/%v", cmd.AssetID)
+		path = fmt.Sprintf("/asset/%v", url.QueryEscape(cmd.AssetID))
 	}
 	logger := goa.NewLogger(log.New(os.Stderr, "", log.LstdFlags))
 	ctx := goa.WithLogger(context.Background(), logger)
@@ -461,7 +459,7 @@ func (cmd *ShowAssetCommand) Run(c *client.Client, args []string) error {
 // RegisterFlags registers the command flags with the command line.
 func (cmd *ShowAssetCommand) RegisterFlags(cc *cobra.Command, c *client.Client) {
 	var assetID string
-	cc.Flags().StringVar(&cmd.AssetID, "assetID", assetID, `Asset ID`)
+	cc.Flags().StringVar(&cmd.AssetID, "assetID", assetID, ``)
 }
 
 // Run makes the HTTP request corresponding to the ShowAllAssetCommand command.
@@ -494,7 +492,7 @@ func (cmd *UpdateAssetCommand) Run(c *client.Client, args []string) error {
 	if len(args) > 0 {
 		path = args[0]
 	} else {
-		path = fmt.Sprintf("/asset/%v", cmd.AssetID)
+		path = fmt.Sprintf("/asset/%v", url.QueryEscape(cmd.AssetID))
 	}
 	var payload client.UpdateAssetPayload
 	if cmd.Payload != "" {
@@ -520,7 +518,7 @@ func (cmd *UpdateAssetCommand) RegisterFlags(cc *cobra.Command, c *client.Client
 	cc.Flags().StringVar(&cmd.Payload, "payload", "", "Request body encoded in JSON")
 	cc.Flags().StringVar(&cmd.ContentType, "content", "", "Request content type override, e.g. 'application/x-www-form-urlencoded'")
 	var assetID string
-	cc.Flags().StringVar(&cmd.AssetID, "assetID", assetID, `Asset ID`)
+	cc.Flags().StringVar(&cmd.AssetID, "assetID", assetID, ``)
 }
 
 // Run makes the HTTP request corresponding to the ShowStatusCommand command.

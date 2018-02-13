@@ -13,5 +13,6 @@ Note that because dep ensure happens before the code is generated, all of the pr
 
 ## Tips:
 
-Easy way of logging into to mongo container via CLI 
-` docker exec -it docker_mongodb_1 bash -c  'mongo -u "$MONGO_INITDB_ROOT_USERNAME" -p "$MONGO_INITDB_ROOT_PASSWORD" admin' `
+Easy way of logging into to mongo container via CLI
+
+`docker exec -it docker_mongodb_1 bash -c  'mongo -u "$MONGO_INITDB_ROOT_USERNAME" -p "$MONGO_INITDB_ROOT_PASSWORD" admin'`

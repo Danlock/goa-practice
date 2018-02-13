@@ -22,37 +22,31 @@ import (
 //
 // Identifier: application/vnd.asset+json; view=default
 type Asset struct {
-	// Identifier for asset
-	ID bson.ObjectId `bson:"_id" form:"_id" json:"_id"`
+	// Object ID attribute
+	ID *bson.ObjectId `bson:"_id,omitempty" form:"_id" json:"_id,omitempty"`
 	// timestamp of when the asset was created
-	CreatedAt *time.Time `form:"createdAt,omitempty" json:"createdAt,omitempty" xml:"createdAt,omitempty"`
+	CreatedAt *time.Time `bson:"createdAt,omitempty" form:"createdAt" json:"createdAt,omitempty"`
 	// Type specific data
-	Data interface{} `form:"data" json:"data" xml:"data"`
+	Data *interface{} `bson:"data,omitempty" form:"data" json:"data,omitempty"`
 	// Name of asset
-	Name string `form:"name" json:"name" xml:"name"`
+	Name *string `bson:"name,omitempty" form:"name" json:"name,omitempty"`
 	// Type of asset
-	Type string `form:"type" json:"type" xml:"type"`
+	Type *string `bson:"type,omitempty" form:"type" json:"type,omitempty"`
 	// timestamp of when the asset was updated
-	UpdatedAt *time.Time `form:"updatedAt,omitempty" json:"updatedAt,omitempty" xml:"updatedAt,omitempty"`
+	UpdatedAt *time.Time `bson:"updatedAt,omitempty" form:"updatedAt" json:"updatedAt,omitempty"`
 }
 
 // Validate validates the Asset media type instance.
 func (mt *Asset) Validate() (err error) {
-	if mt.ID == "" {
-		err = goa.MergeErrors(err, goa.MissingAttributeError(`response`, "_id"))
+	if mt.Name != nil {
+		if utf8.RuneCountInString(*mt.Name) < 3 {
+			err = goa.MergeErrors(err, goa.InvalidLengthError(`response.name`, *mt.Name, utf8.RuneCountInString(*mt.Name), 3, true))
+		}
 	}
-	if mt.Name == "" {
-		err = goa.MergeErrors(err, goa.MissingAttributeError(`response`, "name"))
-	}
-	if mt.Type == "" {
-		err = goa.MergeErrors(err, goa.MissingAttributeError(`response`, "type"))
-	}
-
-	if utf8.RuneCountInString(mt.Name) < 3 {
-		err = goa.MergeErrors(err, goa.InvalidLengthError(`response.name`, mt.Name, utf8.RuneCountInString(mt.Name), 3, true))
-	}
-	if !(mt.Type == "car") {
-		err = goa.MergeErrors(err, goa.InvalidEnumValueError(`response.type`, mt.Type, []interface{}{"car"}))
+	if mt.Type != nil {
+		if !(*mt.Type == "car") {
+			err = goa.MergeErrors(err, goa.InvalidEnumValueError(`response.type`, *mt.Type, []interface{}{"car"}))
+		}
 	}
 	return
 }
