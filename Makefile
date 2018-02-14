@@ -22,9 +22,9 @@ generate:
 	@echo "Generating and renaming vendor to avoid goagen conflicts......"
 	@mv vendor/ temp-vendor/
 	@goagen app     -d github.com/danlock/goa-practice/design -o generated || $(MAKE) fix-vendor
-	@goagen swagger -d github.com/danlock/goa-practice/design -o generated/public
-	@goagen schema -d github.com/danlock/goa-practice/design -o generated/public
-	@goagen client  -d github.com/danlock/goa-practice/design -o generated
+	@goagen swagger -d github.com/danlock/goa-practice/design -o generated/public || $(MAKE) fix-vendor
+	@goagen schema -d github.com/danlock/goa-practice/design -o generated/public || $(MAKE) fix-vendor
+	@goagen client  -d github.com/danlock/goa-practice/design -o generated || $(MAKE) fix-vendor
 
 fix-vendor:
 	@mv temp-vendor/ vendor/ 

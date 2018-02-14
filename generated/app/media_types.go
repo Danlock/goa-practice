@@ -67,6 +67,27 @@ func (mt AssetCollection) Validate() (err error) {
 	return
 }
 
+// An event for an asset (default view)
+//
+// Identifier: application/vnd.event+json; view=default
+type Event struct {
+	// Object ID attribute
+	ID *bson.ObjectId `bson:"_id,omitempty" form:"_id" json:"_id,omitempty"`
+	// Associated asset id
+	AssetID *bson.ObjectId `bson:"assetID,omitempty" form:"assetID" json:"assetID,omitempty"`
+	// timestamp of when the event was created
+	CreatedAt *time.Time `bson:"createdAt,omitempty" form:"createdAt" json:"createdAt,omitempty"`
+	// Type specific data
+	Data *interface{} `bson:"data,omitempty" form:"data" json:"data,omitempty"`
+	// Type of event
+	Type *string `bson:"type,omitempty" form:"type" json:"type,omitempty"`
+}
+
+// EventCollection is the media type for an array of Event (default view)
+//
+// Identifier: application/vnd.event+json; type=collection; view=default
+type EventCollection []*Event
+
 // Status  of API and connections to remote services (default view)
 //
 // Identifier: application/vnd.status+json; view=default

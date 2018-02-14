@@ -218,6 +218,86 @@ func handleDocumentationOrigin(h goa.Handler) goa.Handler {
 	}
 }
 
+// EventController is the controller interface for the Event actions.
+type EventController interface {
+	goa.Muxer
+	Publish(*PublishEventContext) error
+	ShowAll(*ShowAllEventContext) error
+	Subscribe(*SubscribeEventContext) error
+}
+
+// MountEventController "mounts" a Event resource controller on the given service.
+func MountEventController(service *goa.Service, ctrl EventController) {
+	initService(service)
+	var h goa.Handler
+
+	h = func(ctx context.Context, rw http.ResponseWriter, req *http.Request) error {
+		// Check if there was an error loading the request
+		if err := goa.ContextError(ctx); err != nil {
+			return err
+		}
+		// Build the context
+		rctx, err := NewPublishEventContext(ctx, req, service)
+		if err != nil {
+			return err
+		}
+		// Build the payload
+		if rawPayload := goa.ContextRequest(ctx).Payload; rawPayload != nil {
+			rctx.Payload = rawPayload.(*PublishEventPayload)
+		} else {
+			return goa.MissingPayloadError()
+		}
+		return ctrl.Publish(rctx)
+	}
+	service.Mux.Handle("POST", "/asset/:assetID/event/publish", ctrl.MuxHandler("publish", h, unmarshalPublishEventPayload))
+	service.LogInfo("mount", "ctrl", "Event", "action", "Publish", "route", "POST /asset/:assetID/event/publish")
+
+	h = func(ctx context.Context, rw http.ResponseWriter, req *http.Request) error {
+		// Check if there was an error loading the request
+		if err := goa.ContextError(ctx); err != nil {
+			return err
+		}
+		// Build the context
+		rctx, err := NewShowAllEventContext(ctx, req, service)
+		if err != nil {
+			return err
+		}
+		return ctrl.ShowAll(rctx)
+	}
+	service.Mux.Handle("GET", "/asset/:assetID/event/all", ctrl.MuxHandler("showAll", h, nil))
+	service.LogInfo("mount", "ctrl", "Event", "action", "ShowAll", "route", "GET /asset/:assetID/event/all")
+
+	h = func(ctx context.Context, rw http.ResponseWriter, req *http.Request) error {
+		// Check if there was an error loading the request
+		if err := goa.ContextError(ctx); err != nil {
+			return err
+		}
+		// Build the context
+		rctx, err := NewSubscribeEventContext(ctx, req, service)
+		if err != nil {
+			return err
+		}
+		return ctrl.Subscribe(rctx)
+	}
+	service.Mux.Handle("GET", "/asset/:assetID/event/subscribe", ctrl.MuxHandler("subscribe", h, nil))
+	service.LogInfo("mount", "ctrl", "Event", "action", "Subscribe", "route", "GET /asset/:assetID/event/subscribe")
+}
+
+// unmarshalPublishEventPayload unmarshals the request body into the context request data Payload field.
+func unmarshalPublishEventPayload(ctx context.Context, service *goa.Service, req *http.Request) error {
+	payload := &publishEventPayload{}
+	if err := service.DecodeRequest(req, payload); err != nil {
+		return err
+	}
+	if err := payload.Validate(); err != nil {
+		// Initialize payload with private data structure so it can be logged
+		goa.ContextRequest(ctx).Payload = payload
+		return err
+	}
+	goa.ContextRequest(ctx).Payload = payload.Publicize()
+	return nil
+}
+
 // StatusController is the controller interface for the Status actions.
 type StatusController interface {
 	goa.Muxer

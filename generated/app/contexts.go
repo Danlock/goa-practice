@@ -356,6 +356,167 @@ func (ctx *ShowDocumentationContext) OK(resp []byte) error {
 	return err
 }
 
+// PublishEventContext provides the event publish action context.
+type PublishEventContext struct {
+	context.Context
+	*goa.ResponseData
+	*goa.RequestData
+	AssetID string
+	Payload *PublishEventPayload
+}
+
+// NewPublishEventContext parses the incoming request URL and body, performs validations and creates the
+// context used by the event controller publish action.
+func NewPublishEventContext(ctx context.Context, r *http.Request, service *goa.Service) (*PublishEventContext, error) {
+	var err error
+	resp := goa.ContextResponse(ctx)
+	resp.Service = service
+	req := goa.ContextRequest(ctx)
+	req.Request = r
+	rctx := PublishEventContext{Context: ctx, ResponseData: resp, RequestData: req}
+	paramAssetID := req.Params["assetID"]
+	if len(paramAssetID) > 0 {
+		rawAssetID := paramAssetID[0]
+		rctx.AssetID = rawAssetID
+	}
+	return &rctx, err
+}
+
+// publishEventPayload is the event publish action payload.
+type publishEventPayload struct {
+	// Type specific data
+	Data *interface{} `bson:"data,omitempty" form:"data" json:"data,omitempty"`
+	// Type of event
+	Type *string `bson:"type,omitempty" form:"type" json:"type,omitempty"`
+}
+
+// Validate runs the validation rules defined in the design.
+func (payload *publishEventPayload) Validate() (err error) {
+	if payload.Type == nil {
+		err = goa.MergeErrors(err, goa.MissingAttributeError(`raw`, "type"))
+	}
+	if payload.Data == nil {
+		err = goa.MergeErrors(err, goa.MissingAttributeError(`raw`, "data"))
+	}
+	return
+}
+
+// Publicize creates PublishEventPayload from publishEventPayload
+func (payload *publishEventPayload) Publicize() *PublishEventPayload {
+	var pub PublishEventPayload
+	if payload.Data != nil {
+		pub.Data = *payload.Data
+	}
+	if payload.Type != nil {
+		pub.Type = *payload.Type
+	}
+	return &pub
+}
+
+// PublishEventPayload is the event publish action payload.
+type PublishEventPayload struct {
+	// Type specific data
+	Data interface{} `bson:"data,omitempty" form:"data" json:"data,omitempty"`
+	// Type of event
+	Type string `bson:"type,omitempty" form:"type" json:"type,omitempty"`
+}
+
+// Validate runs the validation rules defined in the design.
+func (payload *PublishEventPayload) Validate() (err error) {
+	if payload.Type == "" {
+		err = goa.MergeErrors(err, goa.MissingAttributeError(`raw`, "type"))
+	}
+
+	return
+}
+
+// OK sends a HTTP response with status code 200.
+func (ctx *PublishEventContext) OK(r *Event) error {
+	if ctx.ResponseData.Header().Get("Content-Type") == "" {
+		ctx.ResponseData.Header().Set("Content-Type", "application/vnd.event+json")
+	}
+	return ctx.ResponseData.Service.Send(ctx.Context, 200, r)
+}
+
+// NotFound sends a HTTP response with status code 404.
+func (ctx *PublishEventContext) NotFound() error {
+	ctx.ResponseData.WriteHeader(404)
+	return nil
+}
+
+// ShowAllEventContext provides the event showAll action context.
+type ShowAllEventContext struct {
+	context.Context
+	*goa.ResponseData
+	*goa.RequestData
+	AssetID string
+}
+
+// NewShowAllEventContext parses the incoming request URL and body, performs validations and creates the
+// context used by the event controller showAll action.
+func NewShowAllEventContext(ctx context.Context, r *http.Request, service *goa.Service) (*ShowAllEventContext, error) {
+	var err error
+	resp := goa.ContextResponse(ctx)
+	resp.Service = service
+	req := goa.ContextRequest(ctx)
+	req.Request = r
+	rctx := ShowAllEventContext{Context: ctx, ResponseData: resp, RequestData: req}
+	paramAssetID := req.Params["assetID"]
+	if len(paramAssetID) > 0 {
+		rawAssetID := paramAssetID[0]
+		rctx.AssetID = rawAssetID
+	}
+	return &rctx, err
+}
+
+// OK sends a HTTP response with status code 200.
+func (ctx *ShowAllEventContext) OK(r EventCollection) error {
+	if ctx.ResponseData.Header().Get("Content-Type") == "" {
+		ctx.ResponseData.Header().Set("Content-Type", "application/vnd.event+json; type=collection")
+	}
+	if r == nil {
+		r = EventCollection{}
+	}
+	return ctx.ResponseData.Service.Send(ctx.Context, 200, r)
+}
+
+// NotFound sends a HTTP response with status code 404.
+func (ctx *ShowAllEventContext) NotFound() error {
+	ctx.ResponseData.WriteHeader(404)
+	return nil
+}
+
+// SubscribeEventContext provides the event subscribe action context.
+type SubscribeEventContext struct {
+	context.Context
+	*goa.ResponseData
+	*goa.RequestData
+	AssetID string
+}
+
+// NewSubscribeEventContext parses the incoming request URL and body, performs validations and creates the
+// context used by the event controller subscribe action.
+func NewSubscribeEventContext(ctx context.Context, r *http.Request, service *goa.Service) (*SubscribeEventContext, error) {
+	var err error
+	resp := goa.ContextResponse(ctx)
+	resp.Service = service
+	req := goa.ContextRequest(ctx)
+	req.Request = r
+	rctx := SubscribeEventContext{Context: ctx, ResponseData: resp, RequestData: req}
+	paramAssetID := req.Params["assetID"]
+	if len(paramAssetID) > 0 {
+		rawAssetID := paramAssetID[0]
+		rctx.AssetID = rawAssetID
+	}
+	return &rctx, err
+}
+
+// NotFound sends a HTTP response with status code 404.
+func (ctx *SubscribeEventContext) NotFound() error {
+	ctx.ResponseData.WriteHeader(404)
+	return nil
+}
+
 // ShowStatusContext provides the status show action context.
 type ShowStatusContext struct {
 	context.Context

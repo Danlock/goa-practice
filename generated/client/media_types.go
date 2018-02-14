@@ -82,6 +82,41 @@ func (c *Client) DecodeAssetCollection(resp *http.Response) (AssetCollection, er
 	return decoded, err
 }
 
+// An event for an asset (default view)
+//
+// Identifier: application/vnd.event+json; view=default
+type Event struct {
+	// Object ID attribute
+	ID *bson.ObjectId `bson:"_id,omitempty" form:"_id" json:"_id,omitempty"`
+	// Associated asset id
+	AssetID *bson.ObjectId `bson:"assetID,omitempty" form:"assetID" json:"assetID,omitempty"`
+	// timestamp of when the event was created
+	CreatedAt *time.Time `bson:"createdAt,omitempty" form:"createdAt" json:"createdAt,omitempty"`
+	// Type specific data
+	Data *interface{} `bson:"data,omitempty" form:"data" json:"data,omitempty"`
+	// Type of event
+	Type *string `bson:"type,omitempty" form:"type" json:"type,omitempty"`
+}
+
+// DecodeEvent decodes the Event instance encoded in resp body.
+func (c *Client) DecodeEvent(resp *http.Response) (*Event, error) {
+	var decoded Event
+	err := c.Decoder.Decode(&decoded, resp.Body, resp.Header.Get("Content-Type"))
+	return &decoded, err
+}
+
+// EventCollection is the media type for an array of Event (default view)
+//
+// Identifier: application/vnd.event+json; type=collection; view=default
+type EventCollection []*Event
+
+// DecodeEventCollection decodes the EventCollection instance encoded in resp body.
+func (c *Client) DecodeEventCollection(resp *http.Response) (EventCollection, error) {
+	var decoded EventCollection
+	err := c.Decoder.Decode(&decoded, resp.Body, resp.Header.Get("Content-Type"))
+	return decoded, err
+}
+
 // Status  of API and connections to remote services (default view)
 //
 // Identifier: application/vnd.status+json; view=default

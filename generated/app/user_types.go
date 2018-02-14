@@ -102,3 +102,52 @@ func (ut *AssetType) Validate() (err error) {
 	}
 	return
 }
+
+// evenType user type.
+type evenType struct {
+	// Object ID attribute
+	ID *bson.ObjectId `bson:"_id,omitempty" form:"_id" json:"_id,omitempty"`
+	// Associated asset id
+	AssetID *bson.ObjectId `bson:"assetID,omitempty" form:"assetID" json:"assetID,omitempty"`
+	// timestamp of when the event was created
+	CreatedAt *time.Time `bson:"createdAt,omitempty" form:"createdAt" json:"createdAt,omitempty"`
+	// Type specific data
+	Data *interface{} `bson:"data,omitempty" form:"data" json:"data,omitempty"`
+	// Type of event
+	Type *string `bson:"type,omitempty" form:"type" json:"type,omitempty"`
+}
+
+// Publicize creates EvenType from evenType
+func (ut *evenType) Publicize() *EvenType {
+	var pub EvenType
+	if ut.ID != nil {
+		pub.ID = ut.ID
+	}
+	if ut.AssetID != nil {
+		pub.AssetID = ut.AssetID
+	}
+	if ut.CreatedAt != nil {
+		pub.CreatedAt = ut.CreatedAt
+	}
+	if ut.Data != nil {
+		pub.Data = ut.Data
+	}
+	if ut.Type != nil {
+		pub.Type = ut.Type
+	}
+	return &pub
+}
+
+// EvenType user type.
+type EvenType struct {
+	// Object ID attribute
+	ID *bson.ObjectId `bson:"_id,omitempty" form:"_id" json:"_id,omitempty"`
+	// Associated asset id
+	AssetID *bson.ObjectId `bson:"assetID,omitempty" form:"assetID" json:"assetID,omitempty"`
+	// timestamp of when the event was created
+	CreatedAt *time.Time `bson:"createdAt,omitempty" form:"createdAt" json:"createdAt,omitempty"`
+	// Type specific data
+	Data *interface{} `bson:"data,omitempty" form:"data" json:"data,omitempty"`
+	// Type of event
+	Type *string `bson:"type,omitempty" form:"type" json:"type,omitempty"`
+}

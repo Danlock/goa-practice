@@ -52,10 +52,13 @@ func main() {
 
 	mgoSession, amqpConn := setupSessions()
 
+	//TODO: take cli flags and mount specific controllers
 	app.MountStatusController(service, controller.NewStatusController(service, mgoSession))
 	app.MountAssetController(service, controller.NewAssetController(service, mgoSession, amqpConn))
 	app.MountDocumentationController(service, controller.NewDocumentationController(service))
+	app.MountEventController(service, controller.NewEventController(service, mgoSession, amqpConn))
 	app.MountSwaggerController(service, struct{ *goa.Controller }{Controller: service.NewController("SwaggerController")})
+
 	// Start service
 	if err := service.ListenAndServe(":8080"); err != nil {
 		service.LogError("startup", "err", err)

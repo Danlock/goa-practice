@@ -68,6 +68,29 @@ type (
 		PrettyPrint bool
 	}
 
+	// PublishEventCommand is the command line data structure for the publish action of event
+	PublishEventCommand struct {
+		Payload     string
+		ContentType string
+		// _id of an asset
+		AssetID     string
+		PrettyPrint bool
+	}
+
+	// ShowAllEventCommand is the command line data structure for the showAll action of event
+	ShowAllEventCommand struct {
+		// _id of an asset
+		AssetID     string
+		PrettyPrint bool
+	}
+
+	// SubscribeEventCommand is the command line data structure for the subscribe action of event
+	SubscribeEventCommand struct {
+		// _id of an asset
+		AssetID     string
+		PrettyPrint bool
+	}
+
 	// ShowStatusCommand is the command line data structure for the show action of status
 	ShowStatusCommand struct {
 		PrettyPrint bool
@@ -96,8 +119,8 @@ func RegisterCommands(app *cobra.Command, c *client.Client) {
 Payload example:
 
 {
-   "data": 0.8931668237850219,
-   "name": "6ov5w",
+   "data": "1973-05-06T00:56:27Z",
+   "name": "g66",
    "type": "car"
 }`,
 		RunE: func(cmd *cobra.Command, args []string) error { return tmp1.Run(c, args) },
@@ -121,44 +144,52 @@ Payload example:
 	command.AddCommand(sub)
 	app.AddCommand(command)
 	command = &cobra.Command{
-		Use:   "show",
-		Short: `show action`,
+		Use:   "publish",
+		Short: `Create new event and publish on the queue`,
 	}
-	tmp3 := new(ShowAssetCommand)
+	tmp3 := new(PublishEventCommand)
 	sub = &cobra.Command{
-		Use:   `asset ["/asset/ASSETID"]`,
+		Use:   `event ["/asset/ASSETID/event/publish"]`,
 		Short: ``,
-		RunE:  func(cmd *cobra.Command, args []string) error { return tmp3.Run(c, args) },
+		Long: `
+
+Payload example:
+
+{
+   "data": "2002-11-03T16:31:12Z",
+   "type": "Autem omnis esse quibusdam corrupti sunt."
+}`,
+		RunE: func(cmd *cobra.Command, args []string) error { return tmp3.Run(c, args) },
 	}
 	tmp3.RegisterFlags(sub, c)
 	sub.PersistentFlags().BoolVar(&tmp3.PrettyPrint, "pp", false, "Pretty print response body")
 	command.AddCommand(sub)
-	tmp4 := new(ShowDocumentationCommand)
+	app.AddCommand(command)
+	command = &cobra.Command{
+		Use:   "show",
+		Short: `show action`,
+	}
+	tmp4 := new(ShowAssetCommand)
 	sub = &cobra.Command{
-		Use:   `documentation ["/docs"]`,
+		Use:   `asset ["/asset/ASSETID"]`,
 		Short: ``,
 		RunE:  func(cmd *cobra.Command, args []string) error { return tmp4.Run(c, args) },
 	}
 	tmp4.RegisterFlags(sub, c)
 	sub.PersistentFlags().BoolVar(&tmp4.PrettyPrint, "pp", false, "Pretty print response body")
 	command.AddCommand(sub)
-	tmp5 := new(ShowStatusCommand)
+	tmp5 := new(ShowDocumentationCommand)
 	sub = &cobra.Command{
-		Use:   `status ["/status"]`,
+		Use:   `documentation ["/docs"]`,
 		Short: ``,
 		RunE:  func(cmd *cobra.Command, args []string) error { return tmp5.Run(c, args) },
 	}
 	tmp5.RegisterFlags(sub, c)
 	sub.PersistentFlags().BoolVar(&tmp5.PrettyPrint, "pp", false, "Pretty print response body")
 	command.AddCommand(sub)
-	app.AddCommand(command)
-	command = &cobra.Command{
-		Use:   "show-all",
-		Short: `Get all assets`,
-	}
-	tmp6 := new(ShowAllAssetCommand)
+	tmp6 := new(ShowStatusCommand)
 	sub = &cobra.Command{
-		Use:   `asset ["/asset"]`,
+		Use:   `status ["/status"]`,
 		Short: ``,
 		RunE:  func(cmd *cobra.Command, args []string) error { return tmp6.Run(c, args) },
 	}
@@ -167,10 +198,47 @@ Payload example:
 	command.AddCommand(sub)
 	app.AddCommand(command)
 	command = &cobra.Command{
+		Use:   "show-all",
+		Short: `showAll action`,
+	}
+	tmp7 := new(ShowAllAssetCommand)
+	sub = &cobra.Command{
+		Use:   `asset ["/asset"]`,
+		Short: ``,
+		RunE:  func(cmd *cobra.Command, args []string) error { return tmp7.Run(c, args) },
+	}
+	tmp7.RegisterFlags(sub, c)
+	sub.PersistentFlags().BoolVar(&tmp7.PrettyPrint, "pp", false, "Pretty print response body")
+	command.AddCommand(sub)
+	tmp8 := new(ShowAllEventCommand)
+	sub = &cobra.Command{
+		Use:   `event ["/asset/ASSETID/event/all"]`,
+		Short: ``,
+		RunE:  func(cmd *cobra.Command, args []string) error { return tmp8.Run(c, args) },
+	}
+	tmp8.RegisterFlags(sub, c)
+	sub.PersistentFlags().BoolVar(&tmp8.PrettyPrint, "pp", false, "Pretty print response body")
+	command.AddCommand(sub)
+	app.AddCommand(command)
+	command = &cobra.Command{
+		Use:   "subscribe",
+		Short: `Listen to all events for an asset`,
+	}
+	tmp9 := new(SubscribeEventCommand)
+	sub = &cobra.Command{
+		Use:   `event ["/asset/ASSETID/event/subscribe"]`,
+		Short: ``,
+		RunE:  func(cmd *cobra.Command, args []string) error { return tmp9.Run(c, args) },
+	}
+	tmp9.RegisterFlags(sub, c)
+	sub.PersistentFlags().BoolVar(&tmp9.PrettyPrint, "pp", false, "Pretty print response body")
+	command.AddCommand(sub)
+	app.AddCommand(command)
+	command = &cobra.Command{
 		Use:   "update",
 		Short: `Update specific asset`,
 	}
-	tmp7 := new(UpdateAssetCommand)
+	tmp10 := new(UpdateAssetCommand)
 	sub = &cobra.Command{
 		Use:   `asset ["/asset/ASSETID"]`,
 		Short: ``,
@@ -179,14 +247,14 @@ Payload example:
 Payload example:
 
 {
-   "data": 0.48682559616953486,
-   "name": "1n6",
+   "data": "1970-02-19T17:08:36Z",
+   "name": "2bj",
    "type": "car"
 }`,
-		RunE: func(cmd *cobra.Command, args []string) error { return tmp7.Run(c, args) },
+		RunE: func(cmd *cobra.Command, args []string) error { return tmp10.Run(c, args) },
 	}
-	tmp7.RegisterFlags(sub, c)
-	sub.PersistentFlags().BoolVar(&tmp7.PrettyPrint, "pp", false, "Pretty print response body")
+	tmp10.RegisterFlags(sub, c)
+	sub.PersistentFlags().BoolVar(&tmp10.PrettyPrint, "pp", false, "Pretty print response body")
 	command.AddCommand(sub)
 	app.AddCommand(command)
 
@@ -560,6 +628,94 @@ func (cmd *ShowDocumentationCommand) Run(c *client.Client, args []string) error 
 
 // RegisterFlags registers the command flags with the command line.
 func (cmd *ShowDocumentationCommand) RegisterFlags(cc *cobra.Command, c *client.Client) {
+}
+
+// Run makes the HTTP request corresponding to the PublishEventCommand command.
+func (cmd *PublishEventCommand) Run(c *client.Client, args []string) error {
+	var path string
+	if len(args) > 0 {
+		path = args[0]
+	} else {
+		path = fmt.Sprintf("/asset/%v/event/publish", url.QueryEscape(cmd.AssetID))
+	}
+	var payload client.PublishEventPayload
+	if cmd.Payload != "" {
+		err := json.Unmarshal([]byte(cmd.Payload), &payload)
+		if err != nil {
+			return fmt.Errorf("failed to deserialize payload: %s", err)
+		}
+	}
+	logger := goa.NewLogger(log.New(os.Stderr, "", log.LstdFlags))
+	ctx := goa.WithLogger(context.Background(), logger)
+	resp, err := c.PublishEvent(ctx, path, &payload, cmd.ContentType)
+	if err != nil {
+		goa.LogError(ctx, "failed", "err", err)
+		return err
+	}
+
+	goaclient.HandleResponse(c.Client, resp, cmd.PrettyPrint)
+	return nil
+}
+
+// RegisterFlags registers the command flags with the command line.
+func (cmd *PublishEventCommand) RegisterFlags(cc *cobra.Command, c *client.Client) {
+	cc.Flags().StringVar(&cmd.Payload, "payload", "", "Request body encoded in JSON")
+	cc.Flags().StringVar(&cmd.ContentType, "content", "", "Request content type override, e.g. 'application/x-www-form-urlencoded'")
+	var assetID string
+	cc.Flags().StringVar(&cmd.AssetID, "assetID", assetID, `_id of an asset`)
+}
+
+// Run makes the HTTP request corresponding to the ShowAllEventCommand command.
+func (cmd *ShowAllEventCommand) Run(c *client.Client, args []string) error {
+	var path string
+	if len(args) > 0 {
+		path = args[0]
+	} else {
+		path = fmt.Sprintf("/asset/%v/event/all", url.QueryEscape(cmd.AssetID))
+	}
+	logger := goa.NewLogger(log.New(os.Stderr, "", log.LstdFlags))
+	ctx := goa.WithLogger(context.Background(), logger)
+	resp, err := c.ShowAllEvent(ctx, path)
+	if err != nil {
+		goa.LogError(ctx, "failed", "err", err)
+		return err
+	}
+
+	goaclient.HandleResponse(c.Client, resp, cmd.PrettyPrint)
+	return nil
+}
+
+// RegisterFlags registers the command flags with the command line.
+func (cmd *ShowAllEventCommand) RegisterFlags(cc *cobra.Command, c *client.Client) {
+	var assetID string
+	cc.Flags().StringVar(&cmd.AssetID, "assetID", assetID, `_id of an asset`)
+}
+
+// Run establishes a websocket connection for the SubscribeEventCommand command.
+func (cmd *SubscribeEventCommand) Run(c *client.Client, args []string) error {
+	var path string
+	if len(args) > 0 {
+		path = args[0]
+	} else {
+		path = fmt.Sprintf("/asset/%v/event/subscribe", url.QueryEscape(cmd.AssetID))
+	}
+	logger := goa.NewLogger(log.New(os.Stderr, "", log.LstdFlags))
+	ctx := goa.WithLogger(context.Background(), logger)
+	ws, err := c.SubscribeEvent(ctx, path)
+	if err != nil {
+		goa.LogError(ctx, "failed", "err", err)
+		return err
+	}
+	go goaclient.WSWrite(ws)
+	goaclient.WSRead(ws)
+
+	return nil
+}
+
+// RegisterFlags registers the command flags with the command line.
+func (cmd *SubscribeEventCommand) RegisterFlags(cc *cobra.Command, c *client.Client) {
+	var assetID string
+	cc.Flags().StringVar(&cmd.AssetID, "assetID", assetID, `_id of an asset`)
 }
 
 // Run makes the HTTP request corresponding to the ShowStatusCommand command.

@@ -54,22 +54,28 @@ definitions:
       name: sm4hz
       type: car
       updatedAt: 2003-07-18T22:44:26Z
+    - _id: Perspiciatis vel soluta fugit tenetur.
+      createdAt: 2002-12-31T18:55:28Z
+      data: false
+      name: sm4hz
+      type: car
+      updatedAt: 2003-07-18T22:44:26Z
     items:
       $ref: '#/definitions/Asset'
     title: 'Mediatype identifier: application/vnd.asset+json; type=collection; view=default'
     type: array
   CreateAssetPayload:
     example:
-      data: 0.89316684
-      name: 6ov5w
+      data: 1973-05-06T00:56:27Z
+      name: g66
       type: car
     properties:
       data:
         description: Type specific data
-        example: 0.89316684
+        example: 1973-05-06T00:56:27Z
       name:
         description: Name of asset
-        example: 6ov5w
+        example: g66
         minLength: 3
         type: string
       type:
@@ -83,6 +89,72 @@ definitions:
     - type
     - data
     title: CreateAssetPayload
+    type: object
+  Event:
+    description: An event for an asset (default view)
+    example:
+      _id: Animi dolorem quidem vel optio.
+      assetID: Porro optio illum.
+      createdAt: 1993-06-17T08:19:52Z
+      data: 1c2ed43a-abff-407c-9d65-10decb012f3a
+      type: Non sunt dicta excepturi nemo voluptas quas.
+    properties:
+      _id:
+        description: Object ID attribute
+        example: Animi dolorem quidem vel optio.
+        type: string
+      assetID:
+        description: Associated asset id
+        example: Porro optio illum.
+        type: string
+      createdAt:
+        description: timestamp of when the event was created
+        example: 1993-06-17T08:19:52Z
+        format: date-time
+        type: string
+      data:
+        description: Type specific data
+        example: 1c2ed43a-abff-407c-9d65-10decb012f3a
+      type:
+        description: Type of event
+        example: Non sunt dicta excepturi nemo voluptas quas.
+        type: string
+    title: 'Mediatype identifier: application/vnd.event+json; view=default'
+    type: object
+  EventCollection:
+    description: EventCollection is the media type for an array of Event (default
+      view)
+    example:
+    - _id: Animi dolorem quidem vel optio.
+      assetID: Porro optio illum.
+      createdAt: 1993-06-17T08:19:52Z
+      data: 1c2ed43a-abff-407c-9d65-10decb012f3a
+      type: Non sunt dicta excepturi nemo voluptas quas.
+    - _id: Animi dolorem quidem vel optio.
+      assetID: Porro optio illum.
+      createdAt: 1993-06-17T08:19:52Z
+      data: 1c2ed43a-abff-407c-9d65-10decb012f3a
+      type: Non sunt dicta excepturi nemo voluptas quas.
+    items:
+      $ref: '#/definitions/Event'
+    title: 'Mediatype identifier: application/vnd.event+json; type=collection; view=default'
+    type: array
+  PublishEventPayload:
+    example:
+      data: 2002-11-03T16:31:12Z
+      type: Autem omnis esse quibusdam corrupti sunt.
+    properties:
+      data:
+        description: Type specific data
+        example: 2002-11-03T16:31:12Z
+      type:
+        description: Type of event
+        example: Autem omnis esse quibusdam corrupti sunt.
+        type: string
+    required:
+    - type
+    - data
+    title: PublishEventPayload
     type: object
   Status:
     description: Status  of API and connections to remote services (default view)
@@ -99,16 +171,16 @@ definitions:
     type: object
   UpdateAssetPayload:
     example:
-      data: 0.4868256
-      name: 1n6
+      data: 1970-02-19T17:08:36Z
+      name: 2bj
       type: car
     properties:
       data:
         description: Type specific data
-        example: 0.4868256
+        example: 1970-02-19T17:08:36Z
       name:
         description: Name of asset
-        example: 1n6
+        example: 2bj
         minLength: 3
         type: string
       type:
@@ -229,6 +301,79 @@ paths:
       summary: update asset
       tags:
       - asset
+  /asset/{assetID}/event/all:
+    get:
+      description: Get all events associated with an asset
+      operationId: event#showAll
+      parameters:
+      - description: _id of an asset
+        in: path
+        name: assetID
+        required: true
+        type: string
+      produces:
+      - application/vnd.event+json; type=collection
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/EventCollection'
+        "404":
+          description: Not Found
+      schemes:
+      - http
+      summary: showAll event
+      tags:
+      - event
+  /asset/{assetID}/event/publish:
+    post:
+      description: Create new event and publish on the queue
+      operationId: event#publish
+      parameters:
+      - description: _id of an asset
+        in: path
+        name: assetID
+        required: true
+        type: string
+      - in: body
+        name: payload
+        required: true
+        schema:
+          $ref: '#/definitions/PublishEventPayload'
+      produces:
+      - application/vnd.event+json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/Event'
+        "404":
+          description: Not Found
+      schemes:
+      - http
+      summary: publish event
+      tags:
+      - event
+  /asset/{assetID}/event/subscribe:
+    get:
+      description: Listen to all events for an asset
+      operationId: event#subscribe
+      parameters:
+      - description: _id of an asset
+        in: path
+        name: assetID
+        required: true
+        type: string
+      responses:
+        "101":
+          description: Switching Protocols
+        "404":
+          description: Not Found
+      schemes:
+      - ws
+      summary: subscribe event
+      tags:
+      - event
   /docs:
     get:
       description: ReDoc documentation generated from the swagger.json file
@@ -280,6 +425,8 @@ responses:
     description: Not Found
   OK:
     description: OK
+  SwitchingProtocols:
+    description: Switching Protocols
 schemes:
 - http
 swagger: "2.0"
