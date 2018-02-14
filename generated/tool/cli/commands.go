@@ -37,12 +37,14 @@ type (
 
 	// DeleteAssetCommand is the command line data structure for the delete action of asset
 	DeleteAssetCommand struct {
+		// _id of an asset
 		AssetID     string
 		PrettyPrint bool
 	}
 
 	// ShowAssetCommand is the command line data structure for the show action of asset
 	ShowAssetCommand struct {
+		// _id of an asset
 		AssetID     string
 		PrettyPrint bool
 	}
@@ -56,7 +58,13 @@ type (
 	UpdateAssetCommand struct {
 		Payload     string
 		ContentType string
+		// _id of an asset
 		AssetID     string
+		PrettyPrint bool
+	}
+
+	// ShowDocumentationCommand is the command line data structure for the show action of documentation
+	ShowDocumentationCommand struct {
 		PrettyPrint bool
 	}
 
@@ -125,23 +133,18 @@ Payload example:
 	tmp3.RegisterFlags(sub, c)
 	sub.PersistentFlags().BoolVar(&tmp3.PrettyPrint, "pp", false, "Pretty print response body")
 	command.AddCommand(sub)
-	tmp4 := new(ShowStatusCommand)
+	tmp4 := new(ShowDocumentationCommand)
 	sub = &cobra.Command{
-		Use:   `status ["/status"]`,
+		Use:   `documentation ["/docs"]`,
 		Short: ``,
 		RunE:  func(cmd *cobra.Command, args []string) error { return tmp4.Run(c, args) },
 	}
 	tmp4.RegisterFlags(sub, c)
 	sub.PersistentFlags().BoolVar(&tmp4.PrettyPrint, "pp", false, "Pretty print response body")
 	command.AddCommand(sub)
-	app.AddCommand(command)
-	command = &cobra.Command{
-		Use:   "show-all",
-		Short: `Get all assets`,
-	}
-	tmp5 := new(ShowAllAssetCommand)
+	tmp5 := new(ShowStatusCommand)
 	sub = &cobra.Command{
-		Use:   `asset ["/asset"]`,
+		Use:   `status ["/status"]`,
 		Short: ``,
 		RunE:  func(cmd *cobra.Command, args []string) error { return tmp5.Run(c, args) },
 	}
@@ -150,10 +153,24 @@ Payload example:
 	command.AddCommand(sub)
 	app.AddCommand(command)
 	command = &cobra.Command{
+		Use:   "show-all",
+		Short: `Get all assets`,
+	}
+	tmp6 := new(ShowAllAssetCommand)
+	sub = &cobra.Command{
+		Use:   `asset ["/asset"]`,
+		Short: ``,
+		RunE:  func(cmd *cobra.Command, args []string) error { return tmp6.Run(c, args) },
+	}
+	tmp6.RegisterFlags(sub, c)
+	sub.PersistentFlags().BoolVar(&tmp6.PrettyPrint, "pp", false, "Pretty print response body")
+	command.AddCommand(sub)
+	app.AddCommand(command)
+	command = &cobra.Command{
 		Use:   "update",
 		Short: `Update specific asset`,
 	}
-	tmp6 := new(UpdateAssetCommand)
+	tmp7 := new(UpdateAssetCommand)
 	sub = &cobra.Command{
 		Use:   `asset ["/asset/ASSETID"]`,
 		Short: ``,
@@ -166,10 +183,10 @@ Payload example:
    "name": "1n6",
    "type": "car"
 }`,
-		RunE: func(cmd *cobra.Command, args []string) error { return tmp6.Run(c, args) },
+		RunE: func(cmd *cobra.Command, args []string) error { return tmp7.Run(c, args) },
 	}
-	tmp6.RegisterFlags(sub, c)
-	sub.PersistentFlags().BoolVar(&tmp6.PrettyPrint, "pp", false, "Pretty print response body")
+	tmp7.RegisterFlags(sub, c)
+	sub.PersistentFlags().BoolVar(&tmp7.PrettyPrint, "pp", false, "Pretty print response body")
 	command.AddCommand(sub)
 	app.AddCommand(command)
 
@@ -433,7 +450,7 @@ func (cmd *DeleteAssetCommand) Run(c *client.Client, args []string) error {
 // RegisterFlags registers the command flags with the command line.
 func (cmd *DeleteAssetCommand) RegisterFlags(cc *cobra.Command, c *client.Client) {
 	var assetID string
-	cc.Flags().StringVar(&cmd.AssetID, "assetID", assetID, ``)
+	cc.Flags().StringVar(&cmd.AssetID, "assetID", assetID, `_id of an asset`)
 }
 
 // Run makes the HTTP request corresponding to the ShowAssetCommand command.
@@ -459,7 +476,7 @@ func (cmd *ShowAssetCommand) Run(c *client.Client, args []string) error {
 // RegisterFlags registers the command flags with the command line.
 func (cmd *ShowAssetCommand) RegisterFlags(cc *cobra.Command, c *client.Client) {
 	var assetID string
-	cc.Flags().StringVar(&cmd.AssetID, "assetID", assetID, ``)
+	cc.Flags().StringVar(&cmd.AssetID, "assetID", assetID, `_id of an asset`)
 }
 
 // Run makes the HTTP request corresponding to the ShowAllAssetCommand command.
@@ -518,7 +535,31 @@ func (cmd *UpdateAssetCommand) RegisterFlags(cc *cobra.Command, c *client.Client
 	cc.Flags().StringVar(&cmd.Payload, "payload", "", "Request body encoded in JSON")
 	cc.Flags().StringVar(&cmd.ContentType, "content", "", "Request content type override, e.g. 'application/x-www-form-urlencoded'")
 	var assetID string
-	cc.Flags().StringVar(&cmd.AssetID, "assetID", assetID, ``)
+	cc.Flags().StringVar(&cmd.AssetID, "assetID", assetID, `_id of an asset`)
+}
+
+// Run makes the HTTP request corresponding to the ShowDocumentationCommand command.
+func (cmd *ShowDocumentationCommand) Run(c *client.Client, args []string) error {
+	var path string
+	if len(args) > 0 {
+		path = args[0]
+	} else {
+		path = "/docs"
+	}
+	logger := goa.NewLogger(log.New(os.Stderr, "", log.LstdFlags))
+	ctx := goa.WithLogger(context.Background(), logger)
+	resp, err := c.ShowDocumentation(ctx, path)
+	if err != nil {
+		goa.LogError(ctx, "failed", "err", err)
+		return err
+	}
+
+	goaclient.HandleResponse(c.Client, resp, cmd.PrettyPrint)
+	return nil
+}
+
+// RegisterFlags registers the command flags with the command line.
+func (cmd *ShowDocumentationCommand) RegisterFlags(cc *cobra.Command, c *client.Client) {
 }
 
 // Run makes the HTTP request corresponding to the ShowStatusCommand command.

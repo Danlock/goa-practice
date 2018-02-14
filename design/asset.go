@@ -61,8 +61,7 @@ var assetMedia = apidsl.MediaType("application/vnd.asset+json", func() {
 })
 
 var _ = apidsl.Resource("asset", func() { // Resources group related API endpoints
-	apidsl.BasePath("/asset")       // together. They map to REST resources for REST
-	apidsl.DefaultMedia(assetMedia) // services.
+	apidsl.BasePath("/asset") // together. They map to REST resources for REST
 
 	apidsl.Action("showAll", func() {
 		apidsl.Description("Get all assets")
@@ -80,24 +79,24 @@ var _ = apidsl.Resource("asset", func() { // Resources group related API endpoin
 			apidsl.Attribute("data")
 			apidsl.Required("name", "type", "data")
 		})
-		apidsl.Response(design.OK)
+		apidsl.Response(design.OK, assetMedia)
 	})
 
 	apidsl.Action("show", func() {
 		apidsl.Description("Get specific asset")
 		apidsl.Routing(apidsl.GET("/:assetID"))
 		apidsl.Params(func() {
-			apidsl.Param("assetID")
+			apidsl.Param("assetID", design.String, "_id of an asset")
 			apidsl.Required("assetID")
 		})
-		apidsl.Response(design.OK)
+		apidsl.Response(design.OK, assetMedia)
 	})
 
 	apidsl.Action("update", func() {
 		apidsl.Description("Update specific asset")
 		apidsl.Routing(apidsl.PUT("/:assetID"))
 		apidsl.Params(func() {
-			apidsl.Param("assetID")
+			apidsl.Param("assetID", design.String, "_id of an asset")
 			apidsl.Required("assetID")
 		})
 
@@ -116,7 +115,7 @@ var _ = apidsl.Resource("asset", func() { // Resources group related API endpoin
 		apidsl.Description("Delete specific asset")
 		apidsl.Routing(apidsl.DELETE("/:assetID"))
 		apidsl.Params(func() {
-			apidsl.Param("assetID")
+			apidsl.Param("assetID", design.String, "_id of an asset")
 			apidsl.Required("assetID")
 		})
 		apidsl.Response(design.OK)

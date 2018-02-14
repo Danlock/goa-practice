@@ -21,6 +21,11 @@ func AssetHref(assetID interface{}) string {
 	return fmt.Sprintf("/asset/%v", paramassetID)
 }
 
+// DocumentationHref returns the resource href.
+func DocumentationHref() string {
+	return "/docs"
+}
+
 // StatusHref returns the resource href.
 func StatusHref() string {
 	return "/status"

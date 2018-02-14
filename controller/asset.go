@@ -30,8 +30,7 @@ func (c *AssetController) Delete(ctx *app.DeleteAssetContext) error {
 
 	// Put your logic here
 
-	res := &app.Asset{}
-	return ctx.OK(res)
+	return ctx.OK(nil)
 	// AssetController_Delete: end_implement
 }
 

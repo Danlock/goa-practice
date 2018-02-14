@@ -167,17 +167,16 @@ paths:
       description: Delete specific asset
       operationId: asset#delete
       parameters:
-      - in: path
+      - description: _id of an asset
+        in: path
         name: assetID
         required: true
         type: string
       produces:
-      - application/vnd.asset+json
+      - text/plain
       responses:
         "200":
           description: OK
-          schema:
-            $ref: '#/definitions/Asset'
       schemes:
       - http
       summary: delete asset
@@ -187,7 +186,8 @@ paths:
       description: Get specific asset
       operationId: asset#show
       parameters:
-      - in: path
+      - description: _id of an asset
+        in: path
         name: assetID
         required: true
         type: string
@@ -207,7 +207,8 @@ paths:
       description: Update specific asset
       operationId: asset#update
       parameters:
-      - in: path
+      - description: _id of an asset
+        in: path
         name: assetID
         required: true
         type: string
@@ -217,12 +218,10 @@ paths:
         schema:
           $ref: '#/definitions/UpdateAssetPayload'
       produces:
-      - application/vnd.asset+json
+      - text/plain
       responses:
         "200":
           description: OK
-          schema:
-            $ref: '#/definitions/Asset'
         "404":
           description: Not Found
       schemes:
@@ -230,6 +229,20 @@ paths:
       summary: update asset
       tags:
       - asset
+  /docs:
+    get:
+      description: ReDoc documentation generated from the swagger.json file
+      operationId: documentation#show
+      produces:
+      - text/html; charset=utf-8
+      responses:
+        "200":
+          description: OK
+      schemes:
+      - http
+      summary: show documentation
+      tags:
+      - documentation
   /status:
     get:
       description: Get status of server and connections
@@ -267,8 +280,6 @@ responses:
     description: Not Found
   OK:
     description: OK
-    schema:
-      $ref: '#/definitions/Asset'
 schemes:
 - http
 swagger: "2.0"

@@ -110,10 +110,10 @@ func CreateAssetOK(t goatest.TInterface, ctx context.Context, service *goa.Servi
 }
 
 // DeleteAssetOK runs the method Delete of the given controller with the given parameters.
-// It returns the response writer so it's possible to inspect the response headers and the media type struct written to the response.
+// It returns the response writer so it's possible to inspect the response headers.
 // If ctx is nil then context.Background() is used.
 // If service is nil then a default service is created.
-func DeleteAssetOK(t goatest.TInterface, ctx context.Context, service *goa.Service, ctrl app.AssetController, assetID string) (http.ResponseWriter, *app.Asset) {
+func DeleteAssetOK(t goatest.TInterface, ctx context.Context, service *goa.Service, ctrl app.AssetController, assetID string) http.ResponseWriter {
 	// Setup service
 	var (
 		logBuf bytes.Buffer
@@ -153,7 +153,7 @@ func DeleteAssetOK(t goatest.TInterface, ctx context.Context, service *goa.Servi
 			panic("invalid test data " + _err.Error()) // bug
 		}
 		t.Errorf("unexpected parameter validation error: %+v", e)
-		return nil, nil
+		return nil
 	}
 
 	// Perform action
@@ -166,21 +166,9 @@ func DeleteAssetOK(t goatest.TInterface, ctx context.Context, service *goa.Servi
 	if rw.Code != 200 {
 		t.Errorf("invalid response status code: got %+v, expected 200", rw.Code)
 	}
-	var mt *app.Asset
-	if resp != nil {
-		var _ok bool
-		mt, _ok = resp.(*app.Asset)
-		if !_ok {
-			t.Fatalf("invalid response media: got variable of type %T, value %+v, expected instance of app.Asset", resp, resp)
-		}
-		_err = mt.Validate()
-		if _err != nil {
-			t.Errorf("invalid response media type: %s", _err)
-		}
-	}
 
 	// Return results
-	return rw, mt
+	return rw
 }
 
 // ShowAssetOK runs the method Show of the given controller with the given parameters.
@@ -405,10 +393,10 @@ func UpdateAssetNotFound(t goatest.TInterface, ctx context.Context, service *goa
 }
 
 // UpdateAssetOK runs the method Update of the given controller with the given parameters and payload.
-// It returns the response writer so it's possible to inspect the response headers and the media type struct written to the response.
+// It returns the response writer so it's possible to inspect the response headers.
 // If ctx is nil then context.Background() is used.
 // If service is nil then a default service is created.
-func UpdateAssetOK(t goatest.TInterface, ctx context.Context, service *goa.Service, ctrl app.AssetController, assetID string, payload *app.UpdateAssetPayload) (http.ResponseWriter, *app.Asset) {
+func UpdateAssetOK(t goatest.TInterface, ctx context.Context, service *goa.Service, ctrl app.AssetController, assetID string, payload *app.UpdateAssetPayload) http.ResponseWriter {
 	// Setup service
 	var (
 		logBuf bytes.Buffer
@@ -434,7 +422,7 @@ func UpdateAssetOK(t goatest.TInterface, ctx context.Context, service *goa.Servi
 			panic(err) // bug
 		}
 		t.Errorf("unexpected payload validation error: %+v", e)
-		return nil, nil
+		return nil
 	}
 
 	// Setup request context
@@ -459,7 +447,7 @@ func UpdateAssetOK(t goatest.TInterface, ctx context.Context, service *goa.Servi
 			panic("invalid test data " + __err.Error()) // bug
 		}
 		t.Errorf("unexpected parameter validation error: %+v", _e)
-		return nil, nil
+		return nil
 	}
 	updateCtx.Payload = payload
 
@@ -473,19 +461,7 @@ func UpdateAssetOK(t goatest.TInterface, ctx context.Context, service *goa.Servi
 	if rw.Code != 200 {
 		t.Errorf("invalid response status code: got %+v, expected 200", rw.Code)
 	}
-	var mt *app.Asset
-	if resp != nil {
-		var __ok bool
-		mt, __ok = resp.(*app.Asset)
-		if !__ok {
-			t.Fatalf("invalid response media: got variable of type %T, value %+v, expected instance of app.Asset", resp, resp)
-		}
-		__err = mt.Validate()
-		if __err != nil {
-			t.Errorf("invalid response media type: %s", __err)
-		}
-	}
 
 	// Return results
-	return rw, mt
+	return rw
 }

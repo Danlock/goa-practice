@@ -54,6 +54,7 @@ func main() {
 
 	app.MountStatusController(service, controller.NewStatusController(service, mgoSession))
 	app.MountAssetController(service, controller.NewAssetController(service, mgoSession, amqpConn))
+	app.MountDocumentationController(service, controller.NewDocumentationController(service))
 	app.MountSwaggerController(service, struct{ *goa.Controller }{Controller: service.NewController("SwaggerController")})
 	// Start service
 	if err := service.ListenAndServe(":8080"); err != nil {
