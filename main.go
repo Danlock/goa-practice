@@ -3,9 +3,9 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"os"
-	"strings"
 
 	"github.com/danlock/goa-practice/controller"
 	"github.com/danlock/goa-practice/generated/app"
@@ -19,14 +19,14 @@ import (
 //TODO: create users specific to application and use that instead of admin/default
 func setupSessions() (*mgo.Session, *amqp.Connection) {
 	mgoSession, err := mgo.Dial(
-		strings.Join([]string{os.Getenv("MONGO_INITDB_ROOT_USERNAME"), ":", os.Getenv("MONGO_INITDB_ROOT_PASSWORD"), "@localhost:27017"}, ""),
+		fmt.Sprintf("%s:%s@localhost:27017", os.Getenv("MONGO_INITDB_ROOT_USERNAME"), os.Getenv("MONGO_INITDB_ROOT_PASSWORD")),
 	)
 	if err != nil {
 		log.Fatalf("Error connecting to MongoDB!\n%v", err)
 	}
 
 	amqpSession, err := amqp.Dial(
-		strings.Join([]string{"amqp://", os.Getenv("RABBITMQ_DEFAULT_USER"), ":", os.Getenv("RABBITMQ_DEFAULT_PASS"), "@localhost:5672"}, ""),
+		fmt.Sprintf("amqp://%s:%s@localhost:5672", os.Getenv("RABBITMQ_DEFAULT_USER"), os.Getenv("RABBITMQ_DEFAULT_PASS")),
 	)
 	if err != nil {
 		log.Fatalf("Error connecting to RabbitMQ!\n%v", err)
@@ -45,7 +45,8 @@ func main() {
 	// Mount middleware
 	service.Use(middleware.RequestID())
 	service.Use(middleware.LogRequest(true))
-	service.Use(middleware.LogResponse())
+	//Fails on use of websocket, must make custom logging middleware
+	// service.Use(middleware.LogResponse())
 	service.Use(middleware.ErrorHandler(service, true))
 	//TODO: Recover middleware sends panics to the user as response, only mount in development.
 	service.Use(middleware.Recover())

@@ -1,9 +1,11 @@
 package controller
 
 import (
-	"io"
+	"fmt"
 	"log"
 	"time"
+
+	"encoding/json"
 
 	"github.com/danlock/goa-practice/generated/app"
 	"github.com/globalsign/mgo"
@@ -51,6 +53,33 @@ func (c *EventController) Publish(ctx *app.PublishEventContext) error {
 		log.Printf("Error inserting asset in mongo!\n%s", err)
 		return err
 	}
+	amqpCh, err := c.amqpConn.Channel()
+	if err != nil {
+		log.Printf("Error opening channel to queue!\n%s", err)
+		return err
+	}
+	defer amqpCh.Close()
+
+	assetQ, err := amqpCh.QueueDeclare(fmt.Sprintf("asset:%s:event", ctx.AssetID), false, false, false, false, nil)
+	if err != nil {
+		log.Printf("Error declaring queue!\n%s", err)
+		return err
+	}
+
+	eventJson, err := json.Marshal(&event)
+	if err != nil {
+		log.Printf("Error marshaling event JSON somehow!!\n%s", err)
+		return err
+	}
+
+	err = amqpCh.Publish("", assetQ.Name, false, false, amqp.Publishing{
+		ContentType: "apllication/json",
+		Body:        eventJson,
+	})
+	if err != nil {
+		log.Printf("Error publishing event!\n%s", err)
+		return err
+	}
 
 	return ctx.OK(&event)
 	// EventController_Publish: end_implement
@@ -87,11 +116,33 @@ func (c *EventController) SubscribeWSHandler(ctx *app.SubscribeEventContext) web
 	return func(ws *websocket.Conn) {
 		// EventController_Subscribe: start_implement
 
-		// Put your logic here
+		amqpCh, err := c.amqpConn.Channel()
+		if err != nil {
+			log.Printf("Error opening channel to queue!\n%s", err)
+			ws.WriteClose(1)
+			return
+		}
+		defer amqpCh.Close()
 
-		ws.Write([]byte("subscribe event"))
-		// Dummy echo websocket server
-		io.Copy(ws, ws)
+		assetQ, err := amqpCh.QueueDeclare(fmt.Sprintf("asset:%s:event", ctx.AssetID), false, false, false, false, nil)
+		if err != nil {
+			log.Printf("Error declaring queue!\n%s", err)
+			ws.WriteClose(2)
+			return
+		}
+		ws.Write([]byte(fmt.Sprintf("subscribe event for asset %s", ctx.AssetID)))
+
+		msgs, err := amqpCh.Consume(assetQ.Name, "", true, false, false, false, nil)
+		if err != nil {
+			log.Printf("Error consuming queue!\n%s", err)
+			ws.WriteClose(3)
+			return
+		}
+
+		for m := range msgs {
+			// log.Printf("Received message!\n%s", string(m.Body))
+			ws.Write(m.Body)
+		}
 		// EventController_Subscribe: end_implement
 	}
 }
